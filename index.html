@@ -35,9 +35,9 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .scene-title{font-size:24px;font-weight:900;color:white;letter-spacing:2px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
 .scene-sub{font-size:13px;color:rgba(255,255,255,.85);margin-top:4px;font-weight:500}
 /* Category tag */
-.cat{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center}
+.cat{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center}
 /* Chinese helper — always visible in CN mode */
-.cn-helper{font-size:14px;color:var(--acc);background:rgba(245,158,11,0.08);padding:10px 14px;border-radius:10px;margin-bottom:14px;text-align:center;border:1px solid rgba(245,158,11,0.15);line-height:1.5}
+.cn-helper{font-size:14px;color:var(--acc);background:rgba(245,158,11,0.08);padding:10px 14px;border-radius:10px;margin-bottom:14px;text-align:center;border:1px solid rgba(245,158,11,0.15);line-height:1.5;overflow-wrap:break-word}
 /* Stress visualization — the core visual */
 .stress-row{display:flex;gap:4px;justify-content:center;align-items:flex-end;margin-bottom:16px;min-height:70px;flex-wrap:wrap;padding:8px 0}
 .stress-word{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:28px}
@@ -47,10 +47,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .stress-label{font-size:11px;color:var(--dim);line-height:1.2}
 .stress-label.loud{color:var(--acc);font-weight:800;font-size:12px}
 /* Sentence */
-.sentence{font-size:22px;font-weight:700;text-align:center;line-height:1.4;margin-bottom:4px}
+.sentence{font-size:22px;font-weight:700;text-align:center;line-height:1.4;margin-bottom:4px;overflow-wrap:break-word;word-break:break-word}
 .ipa{font-size:12px;color:var(--dim);text-align:center;margin-bottom:16px;font-family:'Courier New',monospace}
 /* Audio buttons */
-.audio-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.audio-row{display:flex;gap:8px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
 .audio-btn{border:none;color:white;padding:12px 22px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .1s;box-shadow:0 2px 8px rgba(0,0,0,.2);min-height:44px}
 .audio-btn:active{transform:scale(.93)}
 .audio-btn.primary{background:var(--pri)}
@@ -59,13 +59,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 @keyframes audioPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 8px rgba(99,102,241,0)}}
 /* Sections */
 .section{margin-bottom:14px}
-.section-label{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;font-weight:700}
+.section-label{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;font-weight:700}
 .section-text{font-size:14px;line-height:1.6;color:var(--txt)}
-.trap{color:#f87171;font-style:italic;font-size:13px;padding:6px 10px;background:rgba(248,113,113,0.06);border-radius:8px;border-left:3px solid #f87171}
-.tip{color:var(--ok);font-size:13px;padding:6px 10px;background:rgba(16,185,129,0.06);border-radius:8px;border-left:3px solid var(--ok)}
+.trap{color:#f87171;font-style:italic;font-size:13px;padding:6px 10px;background:rgba(248,113,113,0.06);border-radius:8px;border-left:3px solid #f87171;overflow-wrap:break-word}
+.tip{color:var(--ok);font-size:13px;padding:6px 10px;background:rgba(16,185,129,0.06);border-radius:8px;border-left:3px solid var(--ok);overflow-wrap:break-word}
 /* Variants */
 .variants{display:flex;flex-direction:column;gap:6px}
-.variant{background:#1a1a2e;padding:8px 12px;border-radius:8px;font-size:13px;border-left:3px solid var(--pri);line-height:1.4}
+.variant{background:#1a1a2e;padding:8px 12px;border-radius:8px;font-size:13px;border-left:3px solid var(--pri);line-height:1.4;overflow-wrap:break-word}
 /* Pattern */
 .pattern{background:rgba(99,102,241,0.12);color:var(--pri);padding:6px 12px;border-radius:8px;font-size:13px;font-family:'Courier New',monospace;display:inline-block;border:1px solid rgba(99,102,241,0.2)}
 /* Chinese reveal */
@@ -144,29 +144,29 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .stress-word.active .stress-label{color:var(--acc)!important;font-weight:900!important}
 .stress-word.active .stress-dot{box-shadow:0 0 14px rgba(245,158,11,.7)!important}
 /* Day Switcher */
-.day-switcher{display:flex;gap:8px;margin-bottom:12px}
-.day-pill{flex:1;padding:12px 10px;border-radius:12px;border:2px solid #1e1e2e;background:var(--card);color:var(--dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .2s}
+.day-switcher{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none;-ms-overflow-style:none}
+.day-switcher::-webkit-scrollbar{display:none}
+.day-pill{flex-shrink:0;min-width:72px;padding:12px 10px;border-radius:12px;border:2px solid #1e1e2e;background:var(--card);color:var(--dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .2s;scroll-snap-align:start}
 .day-pill.active{border-color:var(--pri);background:rgba(99,102,241,.15);color:var(--txt)}
 .day-pill.locked{opacity:.45;cursor:not-allowed}
 .day-pill.locked:active{transform:none}
 .day-pill:active{transform:scale(.97)}
 .day-pill-label{font-size:13px;font-weight:800;letter-spacing:.5px}
-.day-pill-sub{font-size:10px;opacity:.7}
-.day-pill-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#1e1e2e;margin-top:2px}
+.day-pill-sub{font-size:11px;opacity:.7}
+.day-pill-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:#1e1e2e;margin-top:2px}
 .day-pill.active .day-pill-badge{background:var(--pri);color:white}
 /* Day Overview */
-.day-overview{display:flex;justify-content:center;gap:12px;margin-bottom:10px;font-size:11px;color:var(--dim)}
+.day-overview{display:flex;justify-content:center;gap:8px;margin-bottom:10px;font-size:11px;color:var(--dim);flex-wrap:wrap}
 .day-ov-badge{padding:3px 10px;border-radius:8px;background:var(--card);display:inline-flex;align-items:center;gap:4px}
 .day-ov-badge.active{color:var(--pri);font-weight:700;border:1px solid rgba(99,102,241,.3)}
 .day-ov-badge.locked{opacity:.5}
 /* Recording & Comparison */
-.audio-row{flex-wrap:wrap}
 .rec-btn{background:var(--card)!important;border:2px solid var(--dim)}
 .rec-btn.recording{background:var(--red)!important;border-color:var(--red)!important;animation:recPulse 1s ease infinite}
 @keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 12px rgba(239,68,68,0)}}
 .rec-timer{font-size:11px;color:var(--red);font-weight:700;font-variant-numeric:tabular-nums}
 .compare-area{background:var(--card);border-radius:14px;padding:16px;margin-bottom:18px;border:1px solid #1e1e2e}
-.compare-label{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700;text-align:center}
+.compare-label{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700;text-align:center}
 .compare-btns{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
 .compare-btn{border:none;color:white;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:transform .1s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .compare-btn:active{transform:scale(.93)}
@@ -175,7 +175,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .compare-btn.cplaying{animation:audioPulse 1s ease infinite}
 .waveform-wrap{display:flex;gap:8px;margin-bottom:14px}
 .waveform-box{flex:1;text-align:center}
-.waveform-box label{font-size:10px;color:var(--dim);display:block;margin-bottom:4px}
+.waveform-box label{font-size:11px;color:var(--dim);display:block;margin-bottom:4px}
 .waveform-canvas{width:100%;height:50px;border-radius:8px;background:#0a0a0f;display:block}
 .score-wrap{display:flex;flex-direction:column;align-items:center;margin:12px 0 4px}
 .score-ring-container{position:relative;width:80px;height:80px}
@@ -186,7 +186,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .score-label{font-size:11px;color:var(--dim);margin-top:6px}
 .score-detail{font-size:11px;color:var(--dim);margin-top:4px;text-align:center}
 .rec-history{margin-top:12px;padding-top:12px;border-top:1px solid #1e1e2e}
-.rec-history-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center}
+.rec-history-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center}
 .rec-history-list{display:flex;gap:8px;justify-content:center}
 .rec-hist-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 12px;border-radius:10px;background:#0a0a0f;transition:all .15s;min-width:56px}
 .rec-hist-item:active{background:#1e1e2e;transform:scale(.95)}
@@ -237,7 +237,7 @@ import{DAY6,SCENES_DAY6}from'./data/day6.js';
 import{DAY7,SCENES_DAY7}from'./data/day7.js';
 
 /* ---- Day Management ---- */
-let currentDay=parseInt(localStorage.getItem('re-currentDay')||'1');
+let currentDay=parseInt(localStorage.getItem('re-currentDay')||'1')||1;
 function getSentences(){return[DAY1,DAY2,DAY3,DAY4,DAY5,DAY6,DAY7][currentDay-1]||DAY1;}
 function getScenes(){return[SCENES,SCENES_DAY2,SCENES_DAY3,SCENES_DAY4,SCENES_DAY5,SCENES_DAY6,SCENES_DAY7][currentDay-1]||SCENES;}
 
@@ -249,7 +249,7 @@ function getScenes(){return[SCENES,SCENES_DAY2,SCENES_DAY3,SCENES_DAY4,SCENES_DA
   if(oi!==null){localStorage.setItem('re-idx-day1',oi);localStorage.removeItem('re-idx');}
 })();
 
-let idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0');
+let idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0')||0;
 let cnMode=localStorage.getItem('re-cn')==='1';
 const $=s=>document.querySelector(s);
 let audio=null;
@@ -282,7 +282,8 @@ function getProgress(day){
 }
 function saveProgress(p,day){
   const d=day||currentDay;
-  localStorage.setItem(`re-progress-day${d}`,JSON.stringify(p));
+  try{localStorage.setItem(`re-progress-day${d}`,JSON.stringify(p));}
+  catch(e){console.warn('Failed to save progress (storage full?)',e);}
 }
 function todayStr(){return new Date().toISOString().slice(0,10);}
 
@@ -290,15 +291,18 @@ function todayStr(){return new Date().toISOString().slice(0,10);}
 function isDayUnlocked(day){if(day<=1)return true;return getProgress(day-1).quizBest>=60;}
 
 /* Guard: if on a locked day, reset to Day 1 */
-if(!isDayUnlocked(currentDay)){currentDay=1;localStorage.setItem('re-currentDay','1');idx=parseInt(localStorage.getItem('re-idx-day1')||'0');}
+if(!isDayUnlocked(currentDay)){currentDay=1;try{localStorage.setItem('re-currentDay','1');}catch{}idx=parseInt(localStorage.getItem('re-idx-day1')||'0')||0;}
 
 /* ---- Switch Day ---- */
 window.switchDay=function(day){
   if(!isDayUnlocked(day))return;
-  localStorage.setItem(`re-idx-day${currentDay}`,String(idx));
+  // Stop any playing audio
+  if(audio){audio.pause();audio.src='';audio=null;}
+  if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();
+  try{localStorage.setItem(`re-idx-day${currentDay}`,String(idx));}catch{}
   currentDay=day;
-  localStorage.setItem('re-currentDay',String(day));
-  idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0');
+  try{localStorage.setItem('re-currentDay',String(day));}catch{}
+  idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0')||0;
   const len=getSentences().length;
   if(idx>=len)idx=len-1;
   if(idx<0)idx=0;
@@ -333,6 +337,9 @@ function renderDaySwitcher(){
   $('#daySwitcher').innerHTML=pills;
   $('#dayOverview').innerHTML=overview;
   $('#dayBadge').textContent=`Day ${currentDay}`;
+  // Auto-scroll day switcher to active pill
+  const activePill=$('#daySwitcher .day-pill.active');
+  if(activePill)activePill.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
 }
 
 /* ---- Streak Helper (DRY) ---- */
@@ -382,7 +389,7 @@ function renderStreak(){
 /* ---- CN Toggle ---- */
 window.toggleCN=function(){
   cnMode=!cnMode;
-  localStorage.setItem('re-cn',cnMode?'1':'0');
+  try{localStorage.setItem('re-cn',cnMode?'1':'0');}catch{}
   const tog=$('#cnToggle');
   tog.classList.toggle('on',cnMode);
   tog.setAttribute('aria-checked',String(cnMode));
@@ -392,6 +399,11 @@ window.toggleCN=function(){
 /* ---- Main Render ---- */
 function render(){
   if(isRecording)stopRecording();
+  // Clean up any running rhythm animation
+  rhythmTimers.forEach(t=>clearTimeout(t));
+  rhythmTimers=[];
+  // Stop comparison audio if playing
+  if(cmpAudio){cmpAudio.pause();cmpAudio=null;}
   const sents=getSentences();
   const scenes=getScenes();
   if(!sents.length){
@@ -476,13 +488,13 @@ function render(){
   renderDaySwitcher();
   renderRecCompare();
   window.scrollTo({top:0,behavior:'smooth'});
-  localStorage.setItem(`re-idx-day${currentDay}`,idx);
+  try{localStorage.setItem(`re-idx-day${currentDay}`,idx);}catch{}
 }
 
 /* ---- Audio ---- */
 function playAudio(rate=1){
   if(audio){audio.pause();audio.onplay=null;audio.onended=null;audio.onerror=null;audio.src='';audio=null;}
-  speechSynthesis.cancel();
+  if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();
   const sents=getSentences();
   if(!sents.length)return;
   const s=sents[idx];
@@ -495,6 +507,7 @@ function playAudio(rate=1){
   audio.onended=()=>{if(btn)btn.classList.remove('playing');};
   audio.onerror=()=>{
     if(btn)btn.classList.remove('playing');
+    if(typeof speechSynthesis==='undefined')return;
     const u=new SpeechSynthesisUtterance(s.text);
     u.lang='en-US';u.rate=rate*0.85;
     speechSynthesis.speak(u);
@@ -826,7 +839,7 @@ document.addEventListener('keydown',e=>{
 
 /* ---- XP System ---- */
 function getXP(){return parseInt(localStorage.getItem('re-xp')||'0');}
-function addXP(n){const x=getXP()+n;localStorage.setItem('re-xp',String(x));$('#xpNum').textContent=x;return x;}
+function addXP(n){const x=getXP()+n;try{localStorage.setItem('re-xp',String(x));}catch{}$('#xpNum').textContent=x;return x;}
 function updateXP(){$('#xpNum').textContent=getXP();}
 
 /* ---- Quiz Engine (per-day, saves best score) ---- */
@@ -953,6 +966,7 @@ const Quiz={
 
   close(){
     $('#quizOverlay').classList.remove('active');
+    this.questions=[];this.current=0;this.score=0;this.results=[];
     render();
     // Restore focus for accessibility
     if(this._prevFocus&&this._prevFocus.focus)this._prevFocus.focus();

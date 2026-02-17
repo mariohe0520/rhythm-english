@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v11';
+const CACHE = 'rhythm-v12';
 const ASSETS = [
   './',
   './index.html',
