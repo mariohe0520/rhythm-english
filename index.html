@@ -10,16 +10,16 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#64748b;--r:16px}
-html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;overflow:hidden;touch-action:pan-y;-webkit-user-select:none;user-select:none}
-.app{display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none}
+.app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
 /* Header */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;position:sticky;top:0;background:var(--bg);z-index:10}
 .hdr h1{font-size:18px;font-weight:700}
 .hdr .badge{background:var(--pri);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
-.progress-bar{height:4px;background:#1e1e2e;border-radius:2px;margin-bottom:8px}
+.progress-bar{height:4px;background:#1e1e2e;border-radius:2px;margin-bottom:8px;position:sticky;top:48px;z-index:10}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--pri),var(--acc));border-radius:2px;transition:width .3s}
 /* Card */
-.card-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.card-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;position:relative;padding-bottom:80px}
 .card{background:var(--card);border-radius:var(--r);padding:28px 24px;width:100%;max-width:400px;transition:transform .3s,opacity .3s}
 .card.slide-l{transform:translateX(-120%);opacity:0}
 .card.slide-r{transform:translateX(120%);opacity:0}
@@ -208,13 +208,15 @@ window.go=function(d){
   },200);
 };
 
-// Swipe
-let sx=0;
-document.addEventListener('touchstart',e=>sx=e.touches[0].clientX);
+// Swipe — only horizontal, don't block vertical scroll
+let sx=0,sy=0;
+document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
 document.addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-sx;
-  if(Math.abs(dx)>60){dx<0?go(1):go(-1)}
-});
+  const dy=e.changedTouches[0].clientY-sy;
+  // Only trigger swipe if horizontal movement > vertical (not scrolling)
+  if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5){dx<0?go(1):go(-1)}
+},{passive:true});
 
 render();
 </script>
