@@ -154,6 +154,41 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .day-ov-badge{padding:3px 10px;border-radius:8px;background:var(--card);display:inline-flex;align-items:center;gap:4px}
 .day-ov-badge.active{color:var(--pri);font-weight:700;border:1px solid rgba(99,102,241,.3)}
 .day-ov-badge.locked{opacity:.5}
+/* Recording & Comparison */
+.audio-row{flex-wrap:wrap}
+.rec-btn{background:var(--card)!important;border:2px solid var(--dim)}
+.rec-btn.recording{background:var(--red)!important;border-color:var(--red)!important;animation:recPulse 1s ease infinite}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 12px rgba(239,68,68,0)}}
+.rec-timer{font-size:11px;color:var(--red);font-weight:700;font-variant-numeric:tabular-nums}
+.compare-area{background:var(--card);border-radius:14px;padding:16px;margin-bottom:18px;border:1px solid #1e1e2e}
+.compare-label{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700;text-align:center}
+.compare-btns{display:flex;gap:10px;justify-content:center;margin-bottom:14px}
+.compare-btn{border:none;color:white;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:transform .1s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.compare-btn:active{transform:scale(.93)}
+.compare-btn.native{background:var(--pri)}
+.compare-btn.user{background:var(--ok)}
+.compare-btn.cplaying{animation:audioPulse 1s ease infinite}
+.waveform-wrap{display:flex;gap:8px;margin-bottom:14px}
+.waveform-box{flex:1;text-align:center}
+.waveform-box label{font-size:10px;color:var(--dim);display:block;margin-bottom:4px}
+.waveform-canvas{width:100%;height:50px;border-radius:8px;background:#0a0a0f;display:block}
+.score-wrap{display:flex;flex-direction:column;align-items:center;margin:12px 0 4px}
+.score-ring-container{position:relative;width:80px;height:80px}
+.score-ring-svg{transform:rotate(-90deg)}
+.score-ring-bg{fill:none;stroke:#1e1e2e;stroke-width:6}
+.score-ring-fg{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .8s ease,stroke .3s}
+.score-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:900}
+.score-label{font-size:11px;color:var(--dim);margin-top:6px}
+.score-detail{font-size:11px;color:var(--dim);margin-top:4px;text-align:center}
+.rec-history{margin-top:12px;padding-top:12px;border-top:1px solid #1e1e2e}
+.rec-history-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center}
+.rec-history-list{display:flex;gap:8px;justify-content:center}
+.rec-hist-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 12px;border-radius:10px;background:#0a0a0f;transition:all .15s;min-width:56px}
+.rec-hist-item:active{background:#1e1e2e;transform:scale(.95)}
+.rec-hist-item.active{border:1px solid var(--ok)}
+.rec-hist-score{font-size:14px;font-weight:800}
+.rec-hist-time{font-size:9px;color:var(--dim)}
+.rec-hist-play{font-size:16px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -208,6 +243,17 @@ let idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0');
 let cnMode=localStorage.getItem('re-cn')==='1';
 const $=s=>document.querySelector(s);
 let audio=null;
+
+/* ---- Recording State ---- */
+let mediaRecorder=null,isRecording=false,recChunks=[],recBlob=null,recUrl=null;
+let recSentenceId=null,recScore=null,recTimerId=null,recStartTime=0;
+let audioCtx=null;
+function getAudioCtx(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function getRecHistory(sid){return JSON.parse(localStorage.getItem(`re-rec-${sid}`)||'[]');}
 
 /* ---- Progress (per-day) ---- */
 function getProgress(day){
@@ -308,6 +354,7 @@ window.toggleCN=function(){
 
 /* ---- Main Render ---- */
 function render(){
+  if(isRecording)stopRecording();
   const sents=getSentences();
   const scenes=getScenes();
   const s=sents[idx];
@@ -343,7 +390,9 @@ function render(){
       <button class="audio-btn primary" id="playBtn" onclick="window.speak()">🔊 Listen</button>
       <button class="audio-btn slow" onclick="window.speakSlow()">🐢 Slow</button>
       <button class="audio-btn" style="background:#f59e0b" onclick="window.rhythmPlay()">🎵 Rhythm</button>
+      <button class="audio-btn rec-btn" id="recBtn" onclick="window.toggleRecord()">🎙️ Record</button>
     </div>
+    <div id="recCompare"></div>
     <div class="section">
       <div class="section-label">What it means</div>
       <div class="section-text">${s.meaning}</div>
@@ -375,6 +424,7 @@ function render(){
   `;
   renderStreak();
   renderDaySwitcher();
+  renderRecCompare();
   window.scrollTo({top:0,behavior:'smooth'});
   localStorage.setItem(`re-idx-day${currentDay}`,idx);
 }
@@ -435,6 +485,244 @@ window.rhythmPlay=function(){
     elapsed+=wordTime;
   });
   setTimeout(()=>{ball.remove();words.forEach(w=>w.classList.remove('active'));},elapsed+500);
+};
+
+/* ---- Record & Compare ---- */
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    recChunks=[];
+    recSentenceId=getSentences()[idx].id;
+    recScore=null;
+    const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+    mediaRecorder=new MediaRecorder(stream,{mimeType,audioBitsPerSecond:32000});
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};
+    mediaRecorder.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      recBlob=new Blob(recChunks,{type:mimeType});
+      if(recUrl)URL.revokeObjectURL(recUrl);
+      recUrl=URL.createObjectURL(recBlob);
+      isRecording=false;
+      if(recTimerId){clearInterval(recTimerId);recTimerId=null;}
+      const btn=document.getElementById('recBtn');
+      if(btn){btn.classList.remove('recording');btn.innerHTML='🎙️ Record';}
+      renderRecCompare();
+      await analyzeAndScore();
+    };
+    mediaRecorder.start();
+    isRecording=true;
+    recStartTime=Date.now();
+    const btn=document.getElementById('recBtn');
+    if(btn){btn.classList.add('recording');btn.innerHTML='⏹️ <span class="rec-timer">0.0s</span>';}
+    recTimerId=setInterval(()=>{
+      const el=document.querySelector('.rec-timer');
+      if(el)el.textContent=((Date.now()-recStartTime)/1000).toFixed(1)+'s';
+    },100);
+    setTimeout(()=>{if(isRecording&&mediaRecorder&&mediaRecorder.state==='recording')stopRecording();},8000);
+  }catch(e){console.error('Mic error:',e);}
+}
+
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
+  isRecording=false;
+  if(recTimerId){clearInterval(recTimerId);recTimerId=null;}
+  const btn=document.getElementById('recBtn');
+  if(btn){btn.classList.remove('recording');btn.innerHTML='🎙️ Record';}
+}
+
+window.toggleRecord=async function(){
+  if(isRecording)stopRecording();
+  else await startRecording();
+};
+
+function detectPauses(audioBuf){
+  const data=audioBuf.getChannelData(0);
+  const sr=audioBuf.sampleRate;
+  const winSize=Math.floor(sr*0.05);
+  const minSilence=Math.floor(sr*0.2);
+  let silent=0,pauses=0,inSilence=false;
+  for(let i=0;i<data.length;i+=winSize){
+    let sum=0;const end=Math.min(i+winSize,data.length);
+    for(let j=i;j<end;j++)sum+=Math.abs(data[j]);
+    const avg=sum/(end-i);
+    if(avg<0.015){silent+=(end-i);if(silent>=minSilence&&!inSilence){pauses++;inSilence=true;}}
+    else{silent=0;inSilence=false;}
+  }
+  return pauses;
+}
+
+function drawWaveform(audioBuf,canvasId){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth*dpr;
+  const H=canvas.offsetHeight*dpr;
+  canvas.width=W;canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+  const data=audioBuf.getChannelData(0);
+  const bars=40;
+  const barW=W/bars;
+  const samplesPerBar=Math.floor(data.length/bars);
+  const color=canvasId==='waveNative'?'#6366f1':'#10b981';
+  for(let i=0;i<bars;i++){
+    let sum=0;
+    for(let j=0;j<samplesPerBar;j++)sum+=Math.abs(data[i*samplesPerBar+j]||0);
+    const avg=sum/samplesPerBar;
+    const barH=Math.max(2,avg*H*3.5);
+    const x=i*barW+1;
+    const y=(H-barH)/2;
+    ctx.fillStyle=color;
+    ctx.beginPath();
+    if(ctx.roundRect){ctx.roundRect(x,y,barW-2,barH,2);ctx.fill();}
+    else ctx.fillRect(x,y,barW-2,barH);
+  }
+}
+
+async function analyzeAndScore(){
+  if(!recBlob)return;
+  try{
+    const actx=getAudioCtx();
+    const userBuf=await recBlob.arrayBuffer();
+    const userAudio=await actx.decodeAudioData(userBuf.slice(0));
+    drawWaveform(userAudio,'waveUser');
+    const s=getSentences()[idx];
+    const id=String(s.id).padStart(2,'0');
+    let nativeDur=s.words.length*0.3;
+    let nativePauses=Math.max(0,Math.floor(s.words.length/5)-1);
+    try{
+      const resp=await fetch('audio/'+id+'.mp3');
+      if(resp.ok){
+        const natBuf=await resp.arrayBuffer();
+        const natAudio=await actx.decodeAudioData(natBuf.slice(0));
+        nativeDur=natAudio.duration;
+        nativePauses=detectPauses(natAudio);
+        drawWaveform(natAudio,'waveNative');
+      }
+    }catch{}
+    const userDur=userAudio.duration;
+    const durRatio=userDur/Math.max(nativeDur,0.5);
+    const durScore=Math.max(0,60*(1-Math.abs(durRatio-1)*2));
+    const userPauses=detectPauses(userAudio);
+    const pauseDiff=Math.abs(userPauses-nativePauses);
+    const pauseScore=Math.max(0,40-pauseDiff*12);
+    const totalScore=Math.round(Math.min(100,Math.max(0,durScore+pauseScore)));
+    recScore=totalScore;
+    renderScoreRing(totalScore,durScore,pauseScore,userDur,nativeDur);
+    saveRecording(s.id,totalScore);
+  }catch(e){console.error('Analysis error:',e);}
+}
+
+function renderScoreRing(score,dS,pS,uDur,nDur){
+  const el=document.getElementById('scoreRing');
+  if(!el)return;
+  const color=score>=70?'var(--ok)':score>=40?'var(--acc)':'var(--red)';
+  const C=2*Math.PI*34;
+  const offset=C-(score/100)*C;
+  el.innerHTML=`
+    <svg class="score-ring-svg" width="80" height="80" viewBox="0 0 80 80">
+      <circle class="score-ring-bg" cx="40" cy="40" r="34"/>
+      <circle class="score-ring-fg" cx="40" cy="40" r="34" stroke="${color}"
+        stroke-dasharray="${C}" stroke-dashoffset="${C}"/>
+    </svg>
+    <span class="score-num" style="color:${color}">${score}</span>`;
+  const detail=document.getElementById('scoreDetail');
+  if(detail){
+    const durPct=Math.round(Math.max(0,Math.min(100,dS/60*100)));
+    const pPct=Math.round(Math.max(0,Math.min(100,pS/40*100)));
+    detail.innerHTML=`⏱ Duration: ${uDur?uDur.toFixed(1):'?'}s vs ${nDur?nDur.toFixed(1):'?'}s (${durPct}%) · 🎵 Rhythm: ${pPct}%`;
+  }
+  setTimeout(()=>{
+    const fg=el.querySelector('.score-ring-fg');
+    if(fg)fg.setAttribute('stroke-dashoffset',offset);
+  },50);
+}
+
+function saveRecording(sid,score){
+  if(!recBlob)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const key=`re-rec-${sid}`;
+    let hist=JSON.parse(localStorage.getItem(key)||'[]');
+    hist.unshift({b64:reader.result,score,ts:Date.now()});
+    if(hist.length>3)hist=hist.slice(0,3);
+    try{localStorage.setItem(key,JSON.stringify(hist));}
+    catch(e){
+      if(hist.length>1){hist=hist.slice(0,1);try{localStorage.setItem(key,JSON.stringify(hist));}catch{}}
+    }
+    renderRecCompare();
+  };
+  reader.readAsDataURL(recBlob);
+}
+
+function renderRecCompare(){
+  const el=document.getElementById('recCompare');
+  if(!el)return;
+  const s=getSentences()[idx];
+  if(!s){el.innerHTML='';return;}
+  const hasRec=recBlob&&recSentenceId===s.id;
+  const history=getRecHistory(s.id);
+  if(!hasRec&&history.length===0){el.innerHTML='';return;}
+  let html='<div class="compare-area">';
+  html+='<div class="compare-label">🎙️ Record & Compare</div>';
+  if(hasRec){
+    html+=`<div class="compare-btns">
+      <button class="compare-btn native" id="cmpNative" onclick="window.playNative()">🔊 Native</button>
+      <button class="compare-btn user" id="cmpUser" onclick="window.playUser()">🎤 You</button>
+    </div>
+    <div class="waveform-wrap">
+      <div class="waveform-box"><label>Native</label><canvas class="waveform-canvas" id="waveNative"></canvas></div>
+      <div class="waveform-box"><label>You</label><canvas class="waveform-canvas" id="waveUser"></canvas></div>
+    </div>
+    <div class="score-wrap">
+      <div class="score-ring-container" id="scoreRing"></div>
+      <div class="score-label">Rhythm Match</div>
+      <div class="score-detail" id="scoreDetail"></div>
+    </div>`;
+  }
+  if(history.length>0){
+    html+='<div class="rec-history"><div class="rec-history-label">Recent Recordings</div><div class="rec-history-list">';
+    history.forEach((h,i)=>{
+      const c=h.score>=70?'var(--ok)':h.score>=40?'var(--acc)':'var(--red)';
+      const t=new Date(h.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      html+=`<div class="rec-hist-item" onclick="window.playHistRec(${i})">
+        <span class="rec-hist-score" style="color:${c}">${h.score}</span>
+        <span class="rec-hist-play">▶</span>
+        <span class="rec-hist-time">${t}</span>
+      </div>`;
+    });
+    html+='</div></div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+  if(hasRec&&recScore!==null){
+    renderScoreRing(recScore,0,0,0,0);
+    analyzeAndScore();
+  }
+}
+
+let cmpAudio=null;
+window.playNative=function(){
+  if(cmpAudio){cmpAudio.pause();cmpAudio=null;}
+  playAudio(1);
+};
+window.playUser=function(){
+  if(!recUrl)return;
+  if(cmpAudio){cmpAudio.pause();cmpAudio=null;}
+  cmpAudio=new Audio(recUrl);
+  const btn=document.getElementById('cmpUser');
+  if(btn)btn.classList.add('cplaying');
+  cmpAudio.onended=()=>{if(btn)btn.classList.remove('cplaying');cmpAudio=null;};
+  cmpAudio.play();
+};
+window.playHistRec=function(i){
+  const s=getSentences()[idx];
+  const hist=getRecHistory(s.id);
+  if(!hist[i])return;
+  if(cmpAudio){cmpAudio.pause();cmpAudio=null;}
+  cmpAudio=new Audio(hist[i].b64);
+  cmpAudio.onended=()=>{cmpAudio=null;};
+  cmpAudio.play();
 };
 
 /* ---- Navigation ---- */
