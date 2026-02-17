@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#64748b;--r:16px}
+:root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#64748b;--red:#ef4444;--r:16px}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none;overflow-x:hidden}
 .app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 80px)}
 /* Header — sticky */
@@ -138,6 +138,22 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .stress-word.active{transform:scale(1.15);transition:transform .15s}
 .stress-word.active .stress-label{color:var(--acc)!important;font-weight:900!important}
 .stress-word.active .stress-dot{box-shadow:0 0 14px rgba(245,158,11,.7)!important}
+/* Day Switcher */
+.day-switcher{display:flex;gap:8px;margin-bottom:12px}
+.day-pill{flex:1;padding:12px 10px;border-radius:12px;border:2px solid #1e1e2e;background:var(--card);color:var(--dim);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .2s}
+.day-pill.active{border-color:var(--pri);background:rgba(99,102,241,.15);color:var(--txt)}
+.day-pill.locked{opacity:.45;cursor:not-allowed}
+.day-pill.locked:active{transform:none}
+.day-pill:active{transform:scale(.97)}
+.day-pill-label{font-size:13px;font-weight:800;letter-spacing:.5px}
+.day-pill-sub{font-size:10px;opacity:.7}
+.day-pill-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#1e1e2e;margin-top:2px}
+.day-pill.active .day-pill-badge{background:var(--pri);color:white}
+/* Day Overview */
+.day-overview{display:flex;justify-content:center;gap:12px;margin-bottom:10px;font-size:11px;color:var(--dim)}
+.day-ov-badge{padding:3px 10px;border-radius:8px;background:var(--card);display:inline-flex;align-items:center;gap:4px}
+.day-ov-badge.active{color:var(--pri);font-weight:700;border:1px solid rgba(99,102,241,.3)}
+.day-ov-badge.locked{opacity:.5}
 </style>
 </head>
 <body>
@@ -156,6 +172,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
   <div class="streak-bar" id="streakBar"></div>
   <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
   <div class="complete-summary" id="completeSummary"></div>
+  <div class="day-switcher" id="daySwitcher"></div>
+  <div class="day-overview" id="dayOverview"></div>
   <div class="card" id="card"></div>
 </div>
 <!-- Quiz overlay -->
@@ -171,30 +189,92 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 </div>
 <script type="module">
 import{DAY1,SCENES}from'./data/sentences.js';
-let idx=parseInt(localStorage.getItem('re-idx')||'0');
+import{DAY2,SCENES_DAY2}from'./data/day2.js';
+
+/* ---- Day Management ---- */
+let currentDay=parseInt(localStorage.getItem('re-currentDay')||'1');
+function getSentences(){return currentDay===1?DAY1:DAY2;}
+function getScenes(){return currentDay===1?SCENES:SCENES_DAY2;}
+
+/* ---- Migrate old single-day progress (one-time) ---- */
+(function(){
+  const old=localStorage.getItem('re-progress');
+  if(old){localStorage.setItem('re-progress-day1',old);localStorage.removeItem('re-progress');}
+  const oi=localStorage.getItem('re-idx');
+  if(oi!==null){localStorage.setItem('re-idx-day1',oi);localStorage.removeItem('re-idx');}
+})();
+
+let idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0');
 let cnMode=localStorage.getItem('re-cn')==='1';
 const $=s=>document.querySelector(s);
 let audio=null;
-let isPlaying=false;
 
-// Streak & progress tracking
-function getProgress(){return JSON.parse(localStorage.getItem('re-progress')||'{"learned":[],"streak":0,"lastDate":null,"history":[]}');}
-function saveProgress(p){localStorage.setItem('re-progress',JSON.stringify(p));}
+/* ---- Progress (per-day) ---- */
+function getProgress(day){
+  const d=day||currentDay;
+  return JSON.parse(localStorage.getItem(`re-progress-day${d}`)||'{"learned":[],"streak":0,"lastDate":null,"history":[],"quizBest":0}');
+}
+function saveProgress(p,day){
+  const d=day||currentDay;
+  localStorage.setItem(`re-progress-day${d}`,JSON.stringify(p));
+}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 
+/* ---- Day 2 Unlock (Day 1 quiz >= 60%) ---- */
+function isDay2Unlocked(){return getProgress(1).quizBest>=60;}
+
+/* Guard: if on Day 2 but locked, reset to Day 1 */
+if(currentDay===2&&!isDay2Unlocked()){currentDay=1;localStorage.setItem('re-currentDay','1');idx=parseInt(localStorage.getItem('re-idx-day1')||'0');}
+
+/* ---- Switch Day ---- */
+window.switchDay=function(day){
+  if(day===2&&!isDay2Unlocked())return;
+  localStorage.setItem(`re-idx-day${currentDay}`,String(idx));
+  currentDay=day;
+  localStorage.setItem('re-currentDay',String(day));
+  idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0');
+  const len=getSentences().length;
+  if(idx>=len)idx=len-1;
+  if(idx<0)idx=0;
+  renderDaySwitcher();
+  render();
+};
+
+/* ---- Render Day Switcher & Overview ---- */
+function renderDaySwitcher(){
+  const p1=getProgress(1),p2=getProgress(2);
+  const unlocked2=isDay2Unlocked();
+  const pct1=DAY1.length?Math.round(p1.learned.length/DAY1.length*100):0;
+  const pct2=DAY2.length?Math.round(p2.learned.length/DAY2.length*100):0;
+  const badge1=p1.quizBest>0?`✅ ${p1.quizBest}%`:`${pct1}%`;
+  const badge2=unlocked2?(p2.quizBest>0?`✅ ${p2.quizBest}%`:'🆕 NEW'):'🔒 LOCKED';
+  $('#daySwitcher').innerHTML=`
+    <button class="day-pill${currentDay===1?' active':''}" onclick="switchDay(1)">
+      <span class="day-pill-label">Day 1</span>
+      <span class="day-pill-sub">Business Meeting</span>
+      <span class="day-pill-badge">${badge1}</span>
+    </button>
+    <button class="day-pill${currentDay===2?' active':''}${!unlocked2?' locked':''}" onclick="switchDay(2)">
+      <span class="day-pill-label">Day 2</span>
+      <span class="day-pill-sub">Negotiations</span>
+      <span class="day-pill-badge">${badge2}</span>
+    </button>`;
+  $('#dayOverview').innerHTML=`
+    <span class="day-ov-badge${currentDay===1?' active':''}">Day 1 ${p1.quizBest>=60?'✅':pct1>0?'📖':''} ${pct1}%</span>
+    <span class="day-ov-badge${currentDay===2?' active':''}${!unlocked2?' locked':''}">Day 2 ${unlocked2?(p2.quizBest>=60?'✅':'🆕'):'🔒'} ${unlocked2?pct2+'%':'NEW'}</span>`;
+  $('#dayBadge').textContent=`Day ${currentDay}`;
+}
+
+/* ---- Toggle Learned ---- */
 window.toggleLearned=function(){
+  const sents=getSentences();
   const p=getProgress();
-  const sid=DAY1[idx].id;
+  const sid=sents[idx].id;
   const i=p.learned.indexOf(sid);
   if(i>=0)p.learned.splice(i,1);else p.learned.push(sid);
-  // Update streak
   const today=todayStr();
   if(p.lastDate!==today){
-    if(p.lastDate){
-      const d=new Date(p.lastDate);d.setDate(d.getDate()+1);
-      if(d.toISOString().slice(0,10)===today)p.streak++;
-      else p.streak=1;
-    }else p.streak=1;
+    if(p.lastDate){const d=new Date(p.lastDate);d.setDate(d.getDate()+1);if(d.toISOString().slice(0,10)===today)p.streak++;else p.streak=1;}else p.streak=1;
     p.lastDate=today;
     if(!p.history.includes(today))p.history.push(today);
   }
@@ -202,29 +282,23 @@ window.toggleLearned=function(){
   render();
 };
 
+/* ---- Streak ---- */
 function renderStreak(){
   const p=getProgress();
+  const sents=getSentences();
   const streak=p.streak||0;
   const today=todayStr();
-  // Last 7 days
   const dots=[];
-  for(let i=6;i>=0;i--){
-    const d=new Date();d.setDate(d.getDate()-i);
-    const ds=d.toISOString().slice(0,10);
-    const done=p.history&&p.history.includes(ds);
-    const isToday=ds===today;
-    dots.push(`<div class="streak-d${done?' done':''}${isToday?' today':''}"></div>`);
-  }
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const done=p.history&&p.history.includes(ds);const isToday=ds===today;dots.push(`<div class="streak-d${done?' done':''}${isToday?' today':''}"></div>`);}
   $('#streakBar').innerHTML=`
     <span class="streak-fire">🔥</span>
     <span class="streak-num">${streak}</span>
     <span class="streak-label">day streak</span>
     <div class="streak-dots">${dots.join('')}</div>`;
-  // Completion summary
-  const learnedCount=p.learned.length;
-  $('#completeSummary').innerHTML=`<b>${learnedCount}</b>/${DAY1.length} sentences learned today`;
+  $('#completeSummary').innerHTML=`<b>${p.learned.length}</b>/${sents.length} sentences learned · Day ${currentDay}`;
 }
 
+/* ---- CN Toggle ---- */
 window.toggleCN=function(){
   cnMode=!cnMode;
   localStorage.setItem('re-cn',cnMode?'1':'0');
@@ -232,16 +306,19 @@ window.toggleCN=function(){
   render();
 };
 
+/* ---- Main Render ---- */
 function render(){
-  const s=DAY1[idx];
+  const sents=getSentences();
+  const scenes=getScenes();
+  const s=sents[idx];
   if(!s)return;
-  const sc=SCENES[s.id]||{icon:"💬",colors:["#6366f1","#818cf8"],title:"",sub:""};
+  const sc=scenes[s.id]||{icon:"💬",colors:["#6366f1","#818cf8"],title:"",sub:""};
+  const p=getProgress();
   $('#cnToggle').classList.toggle('on',cnMode);
-  $('#prog').style.width=((idx+1)/DAY1.length*100)+'%';
-  $('#count').textContent=`${idx+1} / ${DAY1.length}`;
+  $('#prog').style.width=((idx+1)/sents.length*100)+'%';
+  $('#count').textContent=`${idx+1} / ${sents.length}`;
   $('#prev').disabled=idx===0;
-  $('#next').disabled=idx===DAY1.length-1;
-  // Stress dots — big=stressed, small=unstressed
+  $('#next').disabled=idx===sents.length-1;
   const dots=s.words.map((w,i)=>{
     const stressed=s.stress[i]>=0.8;
     const mid=s.stress[i]>=0.4&&s.stress[i]<0.8;
@@ -250,11 +327,9 @@ function render(){
     const lblCls=stressed?'loud':'';
     return`<div class="stress-word"><div class="stress-dot ${cls}" style="width:${size}px;height:${size}px"></div><span class="stress-label ${lblCls}">${stressed?w.toUpperCase():w}</span></div>`;
   }).join('');
-  // CN helper
   const cnHelper=cnMode?`<div class="cn-helper">💡 ${s.cn}</div>`:'';
-  // Card
   $('#card').innerHTML=`
-    <div class="cat">${s.cat} · ${idx+1}/${DAY1.length}</div>
+    <div class="cat">${s.cat} · ${idx+1}/${sents.length}</div>
     <div class="scene-card" style="background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})">
       <div class="scene-icon">${sc.icon}</div>
       <div class="scene-title">${sc.title}</div>
@@ -293,20 +368,22 @@ function render(){
       <button class="cn-btn" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Reveal 中文'?'Hide 中文':'Reveal 中文'">Reveal 中文</button>
       <div class="cn-text">${s.cn}</div>
     </div>`:''}
-    <button class="learn-btn ${getProgress().learned.includes(s.id)?'learned':'unlearned'}" onclick="window.toggleLearned()">
-      ${getProgress().learned.includes(s.id)?'✅ Learned!':'Mark as Learned'}
+    <button class="learn-btn ${p.learned.includes(s.id)?'learned':'unlearned'}" onclick="window.toggleLearned()">
+      ${p.learned.includes(s.id)?'✅ Learned!':'Mark as Learned'}
     </button>
-    ${getProgress().learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()">🧠 Quiz Me! ('+getProgress().learned.length+' sentences)</button>':''}
+    ${p.learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()">🧠 Quiz Me! ('+p.learned.length+' sentences)</button>':''}
   `;
   renderStreak();
-  // Scroll to top on card change
+  renderDaySwitcher();
   window.scrollTo({top:0,behavior:'smooth'});
-  localStorage.setItem('re-idx',idx);
+  localStorage.setItem(`re-idx-day${currentDay}`,idx);
 }
 
+/* ---- Audio ---- */
 function playAudio(rate=1){
   if(audio){audio.pause();audio.currentTime=0;}
-  const id=String(DAY1[idx].id).padStart(2,'0');
+  const s=getSentences()[idx];
+  const id=String(s.id).padStart(2,'0');
   audio=new Audio('audio/'+id+'.mp3');
   audio.playbackRate=rate;
   const btn=document.getElementById('playBtn');
@@ -314,42 +391,34 @@ function playAudio(rate=1){
   audio.onended=()=>{if(btn)btn.classList.remove('playing');};
   audio.onerror=()=>{
     if(btn)btn.classList.remove('playing');
-    const u=new SpeechSynthesisUtterance(DAY1[idx].text);
+    const u=new SpeechSynthesisUtterance(s.text);
     u.lang='en-US';u.rate=rate*0.85;
     speechSynthesis.speak(u);
   };
   audio.play().catch(()=>audio.onerror());
 }
-
 window.speak=function(){playAudio(1);};
 window.speakSlow=function(){playAudio(0.7);};
 
-// ===== RHYTHM MODE — the differentiator =====
+/* ---- Rhythm Mode (works with any day's sentences) ---- */
 window.rhythmPlay=function(){
-  const s=DAY1[idx];
+  const s=getSentences()[idx];
   if(!s)return;
-  // Play audio
   playAudio(0.85);
-  // Animate bouncing ball across stress dots
   const words=document.querySelectorAll('.stress-word');
   if(!words.length)return;
   const stressRow=document.querySelector('.stress-row');
   if(!stressRow)return;
-  // Remove any existing ball
   stressRow.querySelectorAll('.rhythm-ball').forEach(b=>b.remove());
-  // Create ball
   const ball=document.createElement('div');
   ball.className='rhythm-ball';
   stressRow.style.position='relative';
   stressRow.appendChild(ball);
-  // Timing: distribute words across ~2.5s (approximate sentence length)
-  const totalTime=s.words.length*220; // ~220ms per word avg
   let elapsed=0;
   s.words.forEach((w,i)=>{
     const stressed=s.stress[i]>=0.8;
-    const wordTime=stressed?280:180; // stressed words get more time
+    const wordTime=stressed?280:180;
     setTimeout(()=>{
-      // Position ball above current word
       const wordEl=words[i];
       if(!wordEl)return;
       const rect=wordEl.getBoundingClientRect();
@@ -360,30 +429,25 @@ window.rhythmPlay=function(){
       ball.style.animation='none';
       void ball.offsetWidth;
       ball.style.animation=(stressed?'ballBounceBig':'ballBounce')+' '+(stressed?'0.35s':'0.25s')+' ease';
-      // Highlight current word
       words.forEach(w=>w.classList.remove('active'));
       wordEl.classList.add('active');
     },elapsed);
     elapsed+=wordTime;
   });
-  // Clean up
-  setTimeout(()=>{
-    ball.remove();
-    words.forEach(w=>w.classList.remove('active'));
-  },elapsed+500);
+  setTimeout(()=>{ball.remove();words.forEach(w=>w.classList.remove('active'));},elapsed+500);
 };
 
+/* ---- Navigation ---- */
 window.go=function(dir){
+  const sents=getSentences();
   const card=$('#card');
   card.classList.add(dir>0?'slide-l':'slide-r');
   setTimeout(()=>{
-    idx=Math.max(0,Math.min(DAY1.length-1,idx+dir));
+    idx=Math.max(0,Math.min(sents.length-1,idx+dir));
     card.classList.remove('slide-l','slide-r');
     render();
   },200);
 };
-
-// Swipe — horizontal only, don't block scroll
 let sx=0,sy=0;
 document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
 document.addEventListener('touchend',e=>{
@@ -391,49 +455,39 @@ document.addEventListener('touchend',e=>{
   const dy=e.changedTouches[0].clientY-sy;
   if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?go(1):go(-1);}
 },{passive:true});
-
-// Keyboard nav
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight')go(1);
   if(e.key==='ArrowLeft')go(-1);
   if(e.key===' '){e.preventDefault();window.speak();}
 });
 
-// ===== XP SYSTEM =====
+/* ---- XP System ---- */
 function getXP(){return parseInt(localStorage.getItem('re-xp')||'0');}
 function addXP(n){const x=getXP()+n;localStorage.setItem('re-xp',String(x));$('#xpNum').textContent=x;return x;}
 function updateXP(){$('#xpNum').textContent=getXP();}
 
-// ===== QUIZ ENGINE =====
+/* ---- Quiz Engine (per-day, saves best score) ---- */
 const Quiz={
-  questions:[],
-  current:0,
-  score:0,
-  answered:false,
-  results:[],
+  questions:[],current:0,score:0,answered:false,results:[],
 
-  // Generate quiz from learned sentences
   generate(){
+    const sents=getSentences();
     const p=getProgress();
-    const pool=p.learned.length>=5?DAY1.filter(s=>p.learned.includes(s.id)):DAY1.slice(0,10);
+    const pool=p.learned.length>=5?sents.filter(s=>p.learned.includes(s.id)):sents.slice(0,10);
     if(pool.length<4)return false;
     this.questions=[];this.current=0;this.score=0;this.results=[];
-    // Shuffle and pick 10 (or fewer)
     const shuffled=[...pool].sort(()=>Math.random()-.5).slice(0,10);
     for(const s of shuffled){
       const qType=Math.random();
       if(qType<0.33){
-        // Type 1: What does this mean?
         const wrong=pool.filter(x=>x.id!==s.id).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.cn);
         const opts=[s.cn,...wrong].sort(()=>Math.random()-.5);
         this.questions.push({type:'meaning',prompt:s.text,hint:'What does this mean?',options:opts,answer:s.cn,sentenceId:s.id});
       }else if(qType<0.66){
-        // Type 2: Which sentence fits this scene?
         const wrong=pool.filter(x=>x.id!==s.id).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.text);
         const opts=[s.text,...wrong].sort(()=>Math.random()-.5);
         this.questions.push({type:'scene',prompt:s.cn,hint:'Which English sentence?',options:opts,answer:s.text,sentenceId:s.id});
       }else{
-        // Type 3: Fill the stress — which word is stressed?
         const stressedWords=s.words.filter((_,i)=>s.stress[i]>=0.8);
         if(stressedWords.length===0)continue;
         const target=stressedWords[Math.floor(Math.random()*stressedWords.length)];
@@ -455,14 +509,12 @@ const Quiz={
   renderQuestion(){
     const q=this.questions[this.current];
     this.answered=false;
-    // Progress pips
     $('#quizProgress').innerHTML=this.questions.map((_,i)=>{
       let cls='quiz-pip';
       if(i<this.current)cls+=this.results[i]?' done':' wrong';
       else if(i===this.current)cls+=' current';
       return`<div class="${cls}"></div>`;
     }).join('');
-    // Question content
     $('#quizContent').innerHTML=`
       <div class="quiz-q">${q.prompt}</div>
       <div class="quiz-hint">${q.hint}</div>
@@ -482,7 +534,6 @@ const Quiz={
     const correct=picked===q.answer;
     this.results.push(correct);
     if(correct)this.score++;
-    // Highlight
     document.querySelectorAll('.quiz-opt').forEach((el,j)=>{
       if(q.options[j]===q.answer)el.classList.add('correct');
       else if(j===i&&!correct)el.classList.add('wrong');
@@ -504,25 +555,28 @@ const Quiz={
     const pct=Math.round(this.score/this.questions.length*100);
     const xpEarned=this.score*10;
     addXP(xpEarned);
-    // Update streak
+    // Save best quiz score for current day
+    const wasDay2Unlocked=isDay2Unlocked();
     const p=getProgress();
+    p.quizBest=Math.max(p.quizBest||0,pct);
     const today=todayStr();
     if(p.lastDate!==today){
       if(p.lastDate){const d=new Date(p.lastDate);d.setDate(d.getDate()+1);p.streak=d.toISOString().slice(0,10)===today?p.streak+1:1;}
       else p.streak=1;
       p.lastDate=today;
       if(!p.history.includes(today))p.history.push(today);
-      saveProgress(p);
     }
+    saveProgress(p);
+    const day2JustUnlocked=currentDay===1&&!wasDay2Unlocked&&isDay2Unlocked();
     $('#quizContent').innerHTML=`
       <div class="quiz-score">
         <div class="quiz-score-num">${pct}%</div>
         <div class="quiz-score-label">${this.score}/${this.questions.length} correct</div>
         <div class="quiz-xp">+${xpEarned} XP ⚡</div>
       </div>
+      ${day2JustUnlocked?'<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">🎉 Day 2: Negotiations unlocked!</div>':''}
       <button class="quiz-next-btn" onclick="Quiz.close()" style="margin-top:20px">Done</button>
     `;
-    // Update progress pips
     $('#quizProgress').innerHTML=this.questions.map((_,i)=>{
       return`<div class="quiz-pip${this.results[i]?' done':' wrong'}"></div>`;
     }).join('');
@@ -535,12 +589,10 @@ const Quiz={
 };
 window.Quiz=Quiz;
 
-// Add quiz trigger after learned button in render
-const _origRender=render;
-
+/* ---- Init ---- */
 updateXP();
 render();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
 </script>
 </body>
 </html>
