@@ -9,8 +9,8 @@
 <link rel="manifest" href="manifest.json">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#94a3b8;--red:#ef4444;--r:16px}
-html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none;overflow-x:hidden}
+:root{--bg:#0c1021;--bg2:#1a1f35;--card:#141929;--pri:#6366f1;--acc:#f0b429;--ok:#34d399;--txt:#f8f4ef;--dim:#94a3b8;--red:#ef4444;--r:16px;--gold:#f0b429;--gold-glow:rgba(240,180,41,.45);--emerald:#34d399;--cream:#f8f4ef}
+html,body{height:100%;background:linear-gradient(165deg,var(--bg) 0%,var(--bg2) 100%);color:var(--txt);font-family:-apple-system,system-ui,'Segoe UI',sans-serif;-webkit-user-select:none;user-select:none;overflow-x:hidden}
 .app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 80px) max(16px,env(safe-area-inset-left))}
 /* Header — sticky */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;position:sticky;top:0;background:var(--bg);z-index:10}
@@ -194,6 +194,289 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .rec-hist-score{font-size:14px;font-weight:800}
 .rec-hist-time{font-size:9px;color:var(--dim)}
 .rec-hist-play{font-size:16px;margin-top:2px}
+
+/* ========== PREMIUM VISUAL OVERHAUL ========== */
+
+/* --- Noise texture on background --- */
+body::before{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:180px
+}
+body>*{position:relative;z-index:1}
+
+/* --- Header glow & glass --- */
+.hdr{
+  background:linear-gradient(180deg,var(--bg) 60%,transparent)!important;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding-bottom:16px
+}
+.hdr h1{
+  background:linear-gradient(135deg,var(--gold),#fde68a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;font-size:20px
+}
+
+/* --- Streak bar with fire glow --- */
+.streak-bar{
+  background:rgba(20,25,41,.7);border:1px solid rgba(240,180,41,.12);
+  box-shadow:0 0 20px rgba(240,180,41,.08),0 2px 8px rgba(0,0,0,.3);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-radius:14px
+}
+.streak-fire{filter:drop-shadow(0 0 8px rgba(240,180,41,.6)) drop-shadow(0 0 16px rgba(239,68,68,.3))}
+.streak-num{text-shadow:0 0 12px var(--gold-glow)}
+.streak-d.done{box-shadow:0 0 6px var(--gold-glow)}
+.streak-d.today{animation:todayPulse 2s ease infinite}
+@keyframes todayPulse{0%,100%{box-shadow:0 0 6px var(--gold-glow)}50%{box-shadow:0 0 14px var(--gold-glow),0 0 24px rgba(240,180,41,.2)}}
+
+/* --- Progress bar glow --- */
+.progress-fill{
+  background:linear-gradient(90deg,var(--pri),var(--gold));
+  box-shadow:0 0 12px rgba(240,180,41,.3)
+}
+
+/* --- Scene cards — premium depth --- */
+.scene-card{
+  border-radius:20px;
+  box-shadow:0 4px 6px rgba(0,0,0,.2),0 12px 24px rgba(0,0,0,.3),0 24px 48px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.08);
+  transition:transform .25s ease,box-shadow .25s ease
+}
+.scene-card:active{transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,.3),0 16px 32px rgba(0,0,0,.35),0 32px 56px rgba(0,0,0,.2)}
+
+/* --- Main card — glass depth --- */
+.card{
+  background:rgba(20,25,41,.65)!important;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 4px 6px rgba(0,0,0,.15),0 12px 24px rgba(0,0,0,.2),0 24px 48px rgba(0,0,0,.1)
+}
+
+/* --- Bouncing ball — radial gradient + shine --- */
+.rhythm-ball{
+  background:radial-gradient(circle at 35% 30%,#fde68a,var(--gold) 50%,#b45309 100%)!important;
+  box-shadow:0 0 16px var(--gold-glow),0 0 32px rgba(240,180,41,.25),0 4px 8px rgba(0,0,0,.4)!important
+}
+.rhythm-ball::after{
+  content:'';position:absolute;top:2px;left:3px;width:40%;height:35%;
+  background:radial-gradient(ellipse,rgba(255,255,255,.7),transparent);border-radius:50%
+}
+.rhythm-ball.big{
+  background:radial-gradient(circle at 35% 30%,#fff7cc,#f0b429 40%,#92400e 100%)!important;
+  box-shadow:0 0 24px var(--gold-glow),0 0 48px rgba(240,180,41,.3),0 6px 12px rgba(0,0,0,.5)!important
+}
+
+/* --- Stress dots — gold glow on active --- */
+.stress-dot.big{
+  background:radial-gradient(circle at 40% 35%,#fde68a,var(--gold))!important;
+  box-shadow:0 0 12px var(--gold-glow),0 0 24px rgba(240,180,41,.2)!important
+}
+.stress-word.active .stress-dot{
+  animation:stressPulse 0.8s ease infinite!important;
+  box-shadow:0 0 18px var(--gold-glow),0 0 36px rgba(240,180,41,.3)!important
+}
+@keyframes stressPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 12px var(--gold-glow)}
+  50%{transform:scale(1.2);box-shadow:0 0 24px var(--gold-glow),0 0 40px rgba(240,180,41,.25)}
+}
+
+/* --- Day selector pills — glass effect --- */
+.day-pill{
+  background:rgba(20,25,41,.5)!important;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 2px 8px rgba(0,0,0,.2);
+  border-radius:14px;transition:all .25s ease
+}
+.day-pill.active{
+  background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(240,180,41,.15))!important;
+  border-color:var(--gold)!important;
+  box-shadow:0 0 16px rgba(240,180,41,.2),0 0 32px rgba(99,102,241,.1),inset 0 1px 0 rgba(255,255,255,.1)!important;
+  transform:scale(1.05)
+}
+.day-pill.active .day-pill-badge{background:linear-gradient(135deg,var(--pri),var(--gold))!important;box-shadow:0 0 8px rgba(240,180,41,.3)}
+.day-pill.locked{
+  opacity:.35!important;
+  background:rgba(20,25,41,.3)!important;
+  border-color:rgba(255,255,255,.03)!important
+}
+
+/* --- Quiz option cards --- */
+.quiz-opt{
+  background:rgba(20,25,41,.6)!important;
+  border:1.5px solid rgba(255,255,255,.08)!important;
+  border-radius:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+  transition:all .2s ease,transform .15s ease;
+  position:relative;overflow:visible
+}
+.quiz-opt:hover,.quiz-opt:focus{
+  border-color:rgba(240,180,41,.3)!important;
+  box-shadow:0 0 16px rgba(240,180,41,.1),0 4px 12px rgba(0,0,0,.2)
+}
+.quiz-opt.correct{
+  border-color:var(--emerald)!important;
+  background:rgba(52,211,153,.12)!important;
+  box-shadow:0 0 20px rgba(52,211,153,.2)!important;
+  animation:correctPop .5s ease
+}
+@keyframes correctPop{0%{transform:scale(1)}30%{transform:scale(1.03)}100%{transform:scale(1)}}
+.quiz-opt.correct::after{
+  content:'\2713';position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  font-size:20px;font-weight:900;color:var(--emerald);
+  animation:checkIn .4s ease both
+}
+@keyframes checkIn{
+  0%{opacity:0;transform:translateY(-50%) scale(0)}
+  60%{transform:translateY(-50%) scale(1.3)}
+  100%{opacity:1;transform:translateY(-50%) scale(1)}
+}
+.quiz-opt.wrong{
+  border-color:var(--red)!important;
+  background:rgba(239,68,68,.1)!important;
+  animation:shake .5s ease
+}
+.quiz-opt.wrong::after{
+  content:'\2717';position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  font-size:20px;font-weight:900;color:var(--red);
+  animation:checkIn .4s ease both
+}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+/* --- Quiz overlay & results --- */
+.quiz-overlay{background:linear-gradient(165deg,var(--bg) 0%,var(--bg2) 100%)!important}
+.quiz-next-btn{
+  background:linear-gradient(135deg,var(--pri),#818cf8)!important;
+  box-shadow:0 4px 12px rgba(99,102,241,.3);
+  transition:transform .15s ease,box-shadow .15s ease
+}
+.quiz-next-btn:active{transform:scale(.96)!important;box-shadow:0 2px 6px rgba(99,102,241,.2)}
+.quiz-score-num{
+  background:linear-gradient(135deg,var(--emerald),#6ee7b7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;filter:drop-shadow(0 0 20px rgba(52,211,153,.3))
+}
+.quiz-xp{text-shadow:0 0 16px var(--gold-glow)}
+.quiz-feedback.right{border:1px solid rgba(52,211,153,.2)}
+.quiz-feedback.wrong{border:1px solid rgba(239,68,68,.2)}
+
+/* --- Waveform area — neon glow --- */
+.compare-area{
+  background:rgba(20,25,41,.6)!important;
+  border:1px solid rgba(99,102,241,.15)!important;
+  box-shadow:0 0 20px rgba(99,102,241,.08),0 0 40px rgba(99,102,241,.04),0 4px 12px rgba(0,0,0,.2);
+  border-radius:16px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
+}
+.waveform-canvas{
+  border:1px solid rgba(99,102,241,.15);
+  box-shadow:inset 0 0 12px rgba(99,102,241,.08);
+  border-radius:10px
+}
+
+/* --- Audio buttons — premium --- */
+.audio-btn{
+  box-shadow:0 2px 8px rgba(0,0,0,.25),0 4px 16px rgba(0,0,0,.15)!important;
+  transition:transform .15s ease,box-shadow .15s ease!important
+}
+.audio-btn:active{transform:scale(.96)!important;box-shadow:0 1px 4px rgba(0,0,0,.2)!important}
+.audio-btn.primary{background:linear-gradient(135deg,var(--pri),#818cf8)!important}
+.audio-btn.slow{background:linear-gradient(135deg,var(--emerald),#6ee7b7)!important}
+
+/* --- Sections — layered depth --- */
+.variant{
+  background:rgba(26,31,53,.6)!important;border-left:3px solid var(--pri);
+  border-radius:10px;transition:transform .15s ease
+}
+.variant:hover{transform:translateX(4px)}
+.trap{border-radius:10px}
+.tip{border-radius:10px}
+.pattern{border-radius:10px}
+
+/* --- Learn button --- */
+.learn-btn.unlearned{
+  background:rgba(30,30,46,.5)!important;border:1px solid rgba(255,255,255,.06);
+  transition:all .25s ease
+}
+.learn-btn.learned{
+  background:rgba(52,211,153,.1)!important;border:1px solid rgba(52,211,153,.2);
+  box-shadow:0 0 16px rgba(52,211,153,.1)
+}
+
+/* --- Quiz trigger glow --- */
+.quiz-trigger{
+  border-color:var(--gold)!important;color:var(--gold)!important;
+  box-shadow:0 0 16px rgba(240,180,41,.08);
+  transition:all .25s ease
+}
+
+/* --- Nav buttons --- */
+.nav{background:linear-gradient(transparent,var(--bg) 30%)!important}
+.nav-btn{
+  background:rgba(20,25,41,.7)!important;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 4px 12px rgba(0,0,0,.3)!important;
+  transition:all .2s ease!important
+}
+.nav-btn:active{
+  background:linear-gradient(135deg,var(--pri),var(--gold))!important;
+  transform:scale(.92)!important;
+  box-shadow:0 0 16px rgba(99,102,241,.3)!important
+}
+
+/* --- Page transitions --- */
+.card.slide-l{transform:translateX(-40px)!important;opacity:0}
+.card.slide-r{transform:translateX(40px)!important;opacity:0}
+
+/* --- XP & badge glow --- */
+.xp-num{text-shadow:0 0 8px var(--gold-glow)}
+.badge{
+  background:linear-gradient(135deg,var(--pri),#818cf8)!important;
+  box-shadow:0 2px 8px rgba(99,102,241,.3)
+}
+
+/* --- Score ring glow --- */
+.score-ring-container{filter:drop-shadow(0 0 12px rgba(52,211,153,.2))}
+
+/* --- CN helper warm --- */
+.cn-helper{
+  background:rgba(240,180,41,.06)!important;
+  border-color:rgba(240,180,41,.12)!important;
+  color:var(--gold)
+}
+
+/* --- Toggle switch --- */
+.toggle{background:rgba(30,30,46,.6)!important;border:1px solid rgba(255,255,255,.08)}
+.toggle.on{background:linear-gradient(135deg,var(--pri),var(--gold))!important;border-color:transparent}
+
+/* --- Day overview badges --- */
+.day-ov-badge{
+  background:rgba(20,25,41,.5)!important;
+  border:1px solid rgba(255,255,255,.05);
+  backdrop-filter:blur(4px)
+}
+.day-ov-badge.active{border-color:rgba(99,102,241,.3)!important;box-shadow:0 0 8px rgba(99,102,241,.1)}
+
+/* --- Text warmth --- */
+.sentence{color:var(--cream);text-shadow:0 1px 2px rgba(0,0,0,.2)}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+
+/* --- Recording states --- */
+.rec-btn{border-color:rgba(255,255,255,.12)!important}
+.rec-btn.recording{box-shadow:0 0 20px rgba(239,68,68,.3),0 0 40px rgba(239,68,68,.15)!important}
+.rec-hist-item{
+  background:rgba(10,10,15,.5)!important;
+  border:1px solid rgba(255,255,255,.05)
+}
+.rec-hist-item.active{border-color:var(--emerald)!important;box-shadow:0 0 8px rgba(52,211,153,.15)}
+
+/* ========== END PREMIUM OVERHAUL ========== */
 </style>
 </head>
 <body>
