@@ -1,0 +1,21 @@
+{
+  "name": "Rhythm English",
+  "short_name": "Rhythm",
+  "description": "Learn English like a baby — See, Hear, Connect, Speak",
+  "start_url": "/apps/rhythm-english/index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230a0a0f'/><circle cx='160' cy='300' r='60' fill='%236366f1' opacity='0.5'/><circle cx='256' cy='200' r='90' fill='%236366f1'/><circle cx='352' cy='300' r='60' fill='%236366f1' opacity='0.5'/><text x='256' y='440' text-anchor='middle' font-size='60' font-family='system-ui' font-weight='bold' fill='%23f1f5f9'>RHYTHM</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education"],
+  "lang": "en",
+  "dir": "ltr"
+}
