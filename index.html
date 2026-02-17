@@ -287,7 +287,7 @@ function todayStr(){return new Date().toISOString().slice(0,10);}
 function isDay2Unlocked(){return getProgress(1).quizBest>=60;}
 function isDay3Unlocked(){return getProgress(2).quizBest>=60;}
 function isDay4Unlocked(){return getProgress(3).quizBest>=60;}
-function isDayUnlocked(day){return[()=>true,isDay2Unlocked,isDay3Unlocked,isDay4Unlocked][day-1]?.[]()||day===1;}
+function isDayUnlocked(day){const fns=[()=>true,isDay2Unlocked,isDay3Unlocked,isDay4Unlocked];const fn=fns[day-1];return fn?fn():day===1;}
 
 /* Guard: if on a locked day, reset to Day 1 */
 if(!isDayUnlocked(currentDay)){currentDay=1;localStorage.setItem('re-currentDay','1');idx=parseInt(localStorage.getItem('re-idx-day1')||'0');}
