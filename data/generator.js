@@ -336,5 +336,127 @@ music: [
 science: [
   ["The implications of this research are mind-blowing",[.3,1,.3,1,1,.3,1],"ðə ˌɪmplɪˈkeɪʃənz əv ðɪs rɪˈsɜːrtʃ ɑːr ˈmaɪndˌbloʊɪŋ","Expressing awe at science","这项研究的意义令人震惊","IMPLICATIONS, THIS, RESEARCH, MIND-BLOWING — four beats","Don't say 'The results are significant'","The implications of + [noun] + are mind-blowing",["This changes everything we thought we knew","The science behind this is incredible"]],
   ["We're living in the future and don't even realize it",[.3,1,.3,.3,1,.3,1,1,1,.3],"wɪr ˈlɪvɪŋ ɪn ðə ˈfjuːtʃər ænd doʊnt ˈiːvən ˈrɪəlaɪz ɪt","Tech amazement","我们活在未来却没意识到","LIVING, IN, FUTURE, DON'T, EVEN, REALIZE — awe","Don't say 'Current technology is very advanced'","We're living in the + [noun] + and don't even realize it",["The future is already here","How is this not science fiction?"]],
-  ["AI is going to change everything about how we work",[1,.3,1,.3,1,1,.3,1,.3,1],"ˌeɪˈaɪ ɪz ˈɡoʊɪŋ tə tʃeɪndʒ ˈɛvriθɪŋ əˈbaʊt haʊ wi wɜːrk","AI impact prediction","AI将改变我们工作的方方面面","AI, GOING, CHANGE, EVERYTHING, HOW, WORK — six beats","Don't say 'Artificial intelligence will modify labor'","AI is going to change everything about + [noun]",["AI is reshaping entire industries","The AI revolution is just getting started"]],
-  ["That's a fascinating question, I never thought of it that way",[1,.3,1,1,.2,1,1,.3,.3,1,1],"ðæts ə ˈfæsɪneɪtɪŋ ˈkwɛstʃən aɪ ˈnɛvər θɔːt əv ɪt ðæt weɪ","Intellectual curiosity","这是个很好的问题，我从没这样想过","THAT'S, FASCINATING, QUESTION, NEVER, THOUGHT, WAY — curious","Don't say '
+  ["That's a fascinating question, I never thought of it that way",[1,.3,1,1,.2,1,1,.3,.3,1,1],"ðæts ə ˈfæsɪneɪtɪŋ ˈkwɛstʃən aɪ ˈnɛvər θɔːt əv ɪt ðæt weɪ","Intellectual curiosity","这是个很好的问题，我从没这样想过","THAT'S, FASCINATING, QUESTION, NEVER, THOUGHT, WAY — curious","Don't say 'Your question is interesting'","That's a fascinating + [noun], I never thought of it that way",["What a great question","Huh, I never considered that angle"]],
+  ["The more we learn, the more we realize we don't know",[.3,1,.3,1,.3,1,.3,1,.3,1,1],"ðə mɔːr wi lɜːrn ðə mɔːr wi ˈrɪəlaɪz wi doʊnt noʊ","Intellectual humility","我们学得越多，越发现自己不知道的越多","MORE, LEARN, MORE, REALIZE, DON'T, KNOW — mirror structure","Don't say 'Knowledge reveals ignorance'","The more we + [verb], the more we realize + [clause]",["Every answer raises ten new questions","Science is humbling like that"]],
+  ["Space exploration is humanity's greatest adventure",[1,1,.3,1,1,1],"speɪs ˌɛkspləˈreɪʃən ɪz hjuːˈmænɪtiz ˈɡreɪtɪst ədˈvɛntʃər","Praising space science","太空探索是人类最伟大的冒险","SPACE, EXPLORATION, HUMANITY'S, GREATEST, ADVENTURE — epic","Don't say 'Outer space research is important'","Space exploration is + [possessive] + greatest + [noun]",["The final frontier is calling","What's more inspiring than reaching for the stars?"]],
+],
+nature: [
+  ["There's nothing like watching the sunset after a long day",[.3,1,1,1,.3,1,.3,.3,1,1],"ðɛrz ˈnʌθɪŋ laɪk ˈwɒtʃɪŋ ðə ˈsʌnsɛt ˈæftər ə lɒŋ deɪ","Appreciating nature","没有什么比漫长一天后看日落更好的了","NOTHING, LIKE, WATCHING, SUNSET, AFTER, LONG, DAY — peaceful","Don't say 'Viewing the sun descend is pleasant'","There's nothing like + [verb]ing + [noun] + after + [noun]",["Sunsets hit different after a hard day","Nature's free therapy"]],
+  ["I need to spend more time outdoors, honestly",[.2,1,.3,1,1,1,1,1],"aɪ niːd tə spɛnd mɔːr taɪm aʊtˈdɔːrz ˈɒnɪstli","Wanting more nature","说实话我需要多花时间在户外","NEED, SPEND, MORE, TIME, OUTDOORS, HONESTLY — self-aware","Don't say 'I should increase outdoor activities'","I need to spend more time + [adverb/location]",["Getting outside more is my goal","Fresh air fixes everything"]],
+  ["The mountains are calling and I must go",[.3,1,.3,1,.3,.2,1,1],"ðə ˈmaʊntɪnz ɑːr ˈkɔːlɪŋ ænd aɪ mʌst ɡoʊ","Nature calling","山在召唤，我必须出发","MOUNTAINS, CALLING, MUST, GO — Muir quote rhythm","Don't say 'I wish to visit elevated terrain'","The + [noun] + is calling and I must go",["Nature is calling my name","Time to get out there"]],
+  ["Have you ever seen the northern lights? Life-changing",[.3,.3,1,1,.3,1,1,1],"hæv juː ˈɛvər siːn ðə ˈnɔːrðərn laɪts ˈlaɪf ˈtʃeɪndʒɪŋ","Sharing a nature experience","你见过北极光吗？改变人生的体验","EVER, SEEN, NORTHERN, LIGHTS, LIFE-CHANGING — awe","Don't say 'The aurora borealis is visually impressive'","Have you ever seen + [noun]? + [adj]",["Bucket list stuff right there","Nothing compares to seeing it in person"]],
+  ["Being in nature just clears my head completely",[1,.3,1,1,1,.3,1,1],"ˈbiːɪŋ ɪn ˈneɪtʃər dʒʌst klɪrz maɪ hɛd kəmˈpliːtli","Nature as therapy","身处自然中完全让我头脑清醒","BEING, NATURE, JUST, CLEARS, HEAD, COMPLETELY — calming","Don't say 'Natural environments improve cognition'","Being in nature just + [verb phrase]",["Nature is the best reset button","Trees are better than therapy"]],
+  ["We really need to take better care of the planet",[.2,1,1,.3,1,1,1,.3,.3,1],"wi ˈrɪəli niːd tə teɪk ˈbɛtər kɛr əv ðə ˈplænɪt","Environmental concern","我们真的需要更好地爱护地球","REALLY, NEED, TAKE, BETTER, CARE, PLANET — urgent","Don't say 'Environmental preservation is necessary'","We really need to take better care of + [noun]",["The planet needs us to step up","Sustainability isn't optional anymore"]],
+],
+social: [
+  ["That post went completely viral overnight",[1,1,1,1,1,1],"ðæt poʊst wɛnt kəmˈpliːtli ˈvaɪrəl ˌoʊvərˈnaɪt","Content going viral","那条帖子一夜之间完全火了","THAT, POST, WENT, COMPLETELY, VIRAL, OVERNIGHT — surprise","Don't say 'The content achieved wide distribution'","That + [noun] + went completely viral + [time]",["It blew up out of nowhere","The internet went crazy for it"]],
+  ["Social media is a double-edged sword, honestly",[1,1,.3,.3,1,1,1],"ˈsoʊʃəl ˈmiːdiə ɪz ə ˈdʌbəl ɛdʒd sɔːrd ˈɒnɪstli","Mixed feelings about social media","说实话社交媒体是把双刃剑","SOCIAL, MEDIA, DOUBLE-EDGED, SWORD, HONESTLY — balanced","Don't say 'Online platforms have advantages and disadvantages'","Social media is a + [adj] + [noun], honestly",["Love-hate relationship with social media","It connects us but also drains us"]],
+  ["I need to take a break from my phone for a while",[.2,1,.3,1,.3,1,.3,.3,1,.3,.3,1],"aɪ niːd tə teɪk ə breɪk frɒm maɪ foʊn fɔːr ə waɪl","Digital detox","我需要暂时远离手机一阵子","NEED, TAKE, BREAK, FROM, PHONE, WHILE — self-care","Don't say 'I should reduce device usage'","I need to take a break from + [noun] + for a while",["Digital detox time","My screen time report was scary"]],
+  ["The algorithm really knows me too well",[.3,1,1,1,.3,1,1],"ðə ˈælɡəˌrɪðəm ˈrɪəli noʊz mi tuː wɛl","Algorithm awareness","算法真的太了解我了","ALGORITHM, REALLY, KNOWS, ME, TOO, WELL — modern life","Don't say 'The recommendation system is accurate'","The algorithm + [adverb] + knows me too well",["My feed is eerily accurate","How does it know exactly what I want?"]],
+  ["I saw the funniest thing online today",[.2,1,.3,1,1,1,1],"aɪ sɔː ðə ˈfʌniɪst θɪŋ ˌɒnˈlaɪn təˈdeɪ","Sharing internet content","我今天在网上看到了最搞笑的东西","SAW, FUNNIEST, THING, ONLINE, TODAY — five beats","Don't say 'I viewed amusing content on the internet'","I saw the + [superlative] + thing online + [time]",["Wait till you see this","You're not going to believe what I found"]],
+  ["Content creation is way harder than it looks",[1,1,.3,1,1,.3,.3,1],"ˈkɒntɛnt kriˈeɪʃən ɪz weɪ ˈhɑːrdər ðæn ɪt lʊks","Respecting creators","内容创作比看起来难多了","CONTENT, CREATION, WAY, HARDER, LOOKS — respect","Don't say 'Producing digital media is difficult'","Content creation is way + [comparative] + than it looks",["Making good content takes serious work","People don't realize what goes into this"]],
+],
+dating: [
+  ["We just clicked right away, it was so natural",[.2,.3,1,1,1,.3,.3,1,1],"wi dʒʌst klɪkt raɪt əˈweɪ ɪt wɒz soʊ ˈnætʃərəl","Instant connection","我们立刻就来电了，特别自然","JUST, CLICKED, RIGHT, AWAY, SO, NATURAL — chemistry","Don't say 'We experienced immediate compatibility'","We just clicked + [adverb], it was so + [adj]",["The chemistry was instant","It felt like we'd known each other forever"]],
+  ["Communication is the foundation of any good relationship",[1,.3,.3,1,.3,.3,1,1],"kəˌmjuːnɪˈkeɪʃən ɪz ðə faʊnˈdeɪʃən əv ˈɛni ɡʊd rɪˈleɪʃənʃɪp","Relationship advice","沟通是任何良好关系的基础","COMMUNICATION, FOUNDATION, ANY, GOOD, RELATIONSHIP — wisdom","Don't say 'Verbal exchange is important in partnerships'","Communication is the foundation of + [noun phrase]",["Talk to each other, it's that simple","Relationships live and die by communication"]],
+  ["Long distance is tough but we're making it work",[1,1,.3,1,.3,.3,1,.3,1],"lɒŋ ˈdɪstəns ɪz tʌf bʌt wɪr ˈmeɪkɪŋ ɪt wɜːrk","Long-distance relationship","异地恋很难但我们在努力让它行得通","LONG, DISTANCE, TOUGH, MAKING, IT, WORK — resilient","Don't say 'Geographical separation is challenging'","Long distance is tough but we're + [verb]ing + it work",["It's not easy but totally worth it","Distance makes the heart grow fonder, for real"]],
+  ["It's important to have your own space in a relationship",[.3,1,.3,1,.3,1,1,.3,.3,1],"ɪts ɪmˈpɔːrtənt tə hæv jɔːr oʊn speɪs ɪn ə rɪˈleɪʃənʃɪp","Healthy boundaries","在关系中拥有自己的空间很重要","IMPORTANT, HAVE, OWN, SPACE, IN, RELATIONSHIP — balanced","Don't say 'Individual autonomy matters in partnerships'","It's important to have + [noun phrase] + in a relationship",["Healthy boundaries make healthy relationships","You can be together without being attached at the hip"]],
+  ["Actions speak louder than words in love",[1,1,1,.3,1,.3,1],"ˈækʃənz spiːk ˈlaʊdər ðæn wɜːrdz ɪn lʌv","Love languages","在爱情中行动胜于言语","ACTIONS, SPEAK, LOUDER, THAN, WORDS, LOVE — proverb","Don't say 'Behavioral demonstration exceeds verbal expression'","Actions speak louder than words in + [noun]",["Show don't tell","It's the little things that matter most"]],
+  ["We bring out the best in each other",[.2,1,1,.3,1,.3,1,1],"wi brɪŋ aʊt ðə bɛst ɪn iːtʃ ˈʌðər","Mutual growth","我们让彼此变得更好","WE, BRING, OUT, BEST, IN, EACH, OTHER — mutual","Don't say 'We positively influence one another'","We bring out the best in + [pronoun phrase]",["We make each other better","Together we're stronger than apart"]],
+],
+shopping: [
+  ["I've been eyeing this for weeks, I'm finally getting it",[.2,.3,1,1,.3,1,.2,1,1,.3],"aɪv biːn ˈaɪɪŋ ðɪs fɔːr wiːks aɪm ˈfaɪnəli ˈɡɛtɪŋ ɪt","Finally buying something","我看了好几周了，终于要买了","BEEN, EYEING, THIS, FOR, WEEKS, FINALLY, GETTING — anticipation","Don't say 'I have observed this product for a duration'","I've been eyeing this for + [time], I'm finally + [verb]ing it",["Take my money already","I've wanted this forever"]],
+  ["Is this on sale or is that the regular price?",[.3,1,.3,1,.3,.3,1,.3,1,1],"ɪz ðɪs ɒn seɪl ɔːr ɪz ðæt ðə ˈrɛɡjʊlər praɪs","Asking about price","这是打折还是原价？","IS, THIS, ON, SALE, OR, REGULAR, PRICE — seven beats","Don't say 'Is a discount currently applied?'","Is this on sale or is that the + [adj] + price?",["Any deals going on?","What's the damage?"]],
+  ["I don't need it but I definitely want it",[.2,1,1,.3,.3,.2,1,1,.3],"aɪ doʊnt niːd ɪt bʌt aɪ ˈdɛfɪnɪtli wɒnt ɪt","Shopping temptation","我不需要但我绝对想要","DON'T, NEED, IT, DEFINITELY, WANT, IT — internal debate","Don't say 'The purchase is unnecessary but desired'","I don't need it but I + [adverb] + want it",["My wallet says no but my heart says yes","It's a want, not a need, but still"]],
+  ["This is such a good deal, I can't pass it up",[1,.3,1,.3,1,1,.2,1,1,.3,1],"ðɪs ɪz sʌtʃ ə ɡʊd diːl aɪ kænt pæs ɪt ʌp","Can't resist a deal","这个优惠太好了，我不能错过","THIS, SUCH, GOOD, DEAL, CAN'T, PASS, IT, UP — urgency","Don't say 'The value proposition is compelling'","This is such a good deal, I can't + [verb] + it up",["Too good to pass up","I'd be losing money NOT buying it"]],
+  ["Let me sleep on it before I decide",[.3,.3,1,.3,.3,.3,.2,1],"lɛt mi sliːp ɒn ɪt bɪˈfɔːr aɪ dɪˈsaɪd","Being cautious with spending","让我考虑一晚再决定","LET, SLEEP, ON, IT, BEFORE, DECIDE — measured","Don't say 'I will consider the purchase overnight'","Let me sleep on it before I + [verb]",["I never buy on impulse anymore","Give me a night to think about it"]],
+  ["I just got the best deal on this, look!",[.2,.3,1,.3,1,1,.3,1,1],"aɪ dʒʌst ɡɒt ðə bɛst diːl ɒn ðɪs lʊk","Sharing a shopping win","我刚买到了最好的价格，你看！","JUST, GOT, BEST, DEAL, ON, THIS, LOOK — excited","Don't say 'I obtained a favorable price for this item'","I just got the best deal on + [noun]",["Guess how much I paid for this","You won't believe what I got this for"]],
+],
+};
+
+// ─── Category Icons (text-based, no emoji) ────────────────────────
+const CAT_ICONS = {
+  greetings:'Hi',negotiations:'$',leadership:'★',tech:'</>',sales:'%',
+  conflict:'!!',networking:'@',presentations:'◈',meetings:'●',emails:'✉',
+  interviews:'?!',feedback:'↑',strategy:'◆',brainstorming:'✦',reporting:'#',
+  delegation:'→',mentoring:'♡',celebration:'★',farewell:'~',"small-talk":'...',
+  travel:'✈',food:'♨',health:'+',sports:'⚑',music:'♪',science:'∞',
+  nature:'❋',social:'@',dating:'♡',shopping:'$',
+};
+
+// ─── Slot Filler ──────────────────────────────────────────────────
+function fillSlots(str, rng) {
+  return str
+    .replace(/\{N\}/g, () => pick(NAMES, rng))
+    .replace(/\{D\}/g, () => pick(DEPTS, rng))
+    .replace(/\{M\}/g, () => pick(METRICS, rng))
+    .replace(/\{T\}/g, () => pick(TIMES, rng))
+    .replace(/\{A\}/g, () => pick(ADJS, rng))
+    .replace(/\{#\}/g, () => pick(NUMS, rng))
+    .replace(/\{F\}/g, () => pick(FOODS, rng))
+    .replace(/\{P\}/g, () => pick(PLACES, rng))
+    .replace(/\{S\}/g, () => pick(SPORTS, rng))
+    .replace(/\{G\}/g, () => pick(GENRES, rng));
+}
+
+// ─── Generate Day Content (Day 15+) ──────────────────────────────
+// Returns { sentences: [...], scenes: {...} } matching static day format
+export function generateDay(dayNumber) {
+  const seed = hashStr('rhythm-english-day-' + dayNumber);
+  const rng = mulberry32(seed);
+
+  // Pick 6 categories, 5 sentences each = 30
+  const availCats = CAT_KEYS.filter(k => TPL[k] && TPL[k].length >= 5);
+  const chosenCats = pickN(availCats, 6, rng);
+
+  const sentences = [];
+  const scenes = {};
+  const baseId = (dayNumber - 1) * 30 + 1;
+
+  let si = 0;
+  for (const catKey of chosenCats) {
+    const cat = CATS[catKey];
+    const templates = TPL[catKey];
+    const chosen = pickN(templates, 5, rng);
+
+    for (const tpl of chosen) {
+      const id = baseId + si;
+      const text = fillSlots(tpl[0], rng);
+      const words = text.split(/\s+/);
+
+      // Adapt stress array to match actual word count after slot-fill
+      const rawStress = tpl[1] || [];
+      const stress = [];
+      for (let w = 0; w < words.length; w++) {
+        stress.push(w < rawStress.length ? rawStress[w] : 0.3);
+      }
+
+      sentences.push({
+        id,
+        cat: catKey,
+        scene: (SCENE_TITLES[catKey] ? pick(SCENE_TITLES[catKey], rng) : cat.n).toLowerCase(),
+        text,
+        words,
+        stress,
+        ipa: fillSlots(tpl[2], rng),
+        meaning: tpl[3],
+        cn: fillSlots(tpl[4], rng),
+        trap: tpl[6],
+        tip: tpl[5],
+        pattern: tpl[7],
+        variants: (tpl[8] || []).map(v => fillSlots(v, rng))
+      });
+
+      scenes[id] = {
+        icon: CAT_ICONS[catKey] || '●',
+        colors: cat.c,
+        title: pick(SCENE_TITLES[catKey] || [cat.n], rng),
+        sub: cat.n
+      };
+
+      si++;
+    }
+  }
+
+  return { sentences, scenes };
+}

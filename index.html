@@ -482,13 +482,13 @@ body>*{position:relative;z-index:1}
 <body>
 <div class="app">
   <div class="hdr">
-    <h1>🎵 Rhythm English</h1>
+    <h1>Rhythm English</h1>
     <div class="hdr-right">
       <div class="mode-toggle">
         <label>中文</label>
         <button class="toggle" id="cnToggle" onclick="toggleCN()" role="switch" aria-checked="false" aria-label="Toggle Chinese mode"></button>
       </div>
-      <div class="xp-display">⚡<span class="xp-num" id="xpNum">0</span></div>
+      <div class="xp-display"><span style="font-weight:800;color:var(--acc)">XP</span> <span class="xp-num" id="xpNum">0</span></div>
       <div class="badge" id="dayBadge">Day 1</div>
     </div>
   </div>
@@ -525,13 +525,17 @@ import{DAY11,SCENES_DAY11}from'./data/day11.js';
 import{DAY12,SCENES_DAY12}from'./data/day12.js';
 import{DAY13,SCENES_DAY13}from'./data/day13.js';
 import{DAY14,SCENES_DAY14}from'./data/day14.js';
+import{generateDay}from'./data/generator.js';
 
 /* ---- Day Management ---- */
 let currentDay=parseInt(localStorage.getItem('re-currentDay')||'1')||1;
 const ALL_DAYS=[DAY1,DAY2,DAY3,DAY4,DAY5,DAY6,DAY7,DAY8,DAY9,DAY10,DAY11,DAY12,DAY13,DAY14];
 const ALL_SCENES=[SCENES,SCENES_DAY2,SCENES_DAY3,SCENES_DAY4,SCENES_DAY5,SCENES_DAY6,SCENES_DAY7,SCENES_DAY8,SCENES_DAY9,SCENES_DAY10,SCENES_DAY11,SCENES_DAY12,SCENES_DAY13,SCENES_DAY14];
-function getSentences(){return ALL_DAYS[currentDay-1]||DAY1;}
-function getScenes(){return ALL_SCENES[currentDay-1]||SCENES;}
+/* ---- Generated day cache ---- */
+const generatedCache={};
+function getGeneratedDay(day){if(!generatedCache[day])generatedCache[day]=generateDay(day);return generatedCache[day];}
+function getSentences(){if(currentDay<=14)return ALL_DAYS[currentDay-1]||DAY1;return getGeneratedDay(currentDay).sentences;}
+function getScenes(){if(currentDay<=14)return ALL_SCENES[currentDay-1]||SCENES;return getGeneratedDay(currentDay).scenes;}
 
 /* ---- Migrate old single-day progress (one-time) ---- */
 (function(){
@@ -579,8 +583,8 @@ function saveProgress(p,day){
 }
 function todayStr(){return new Date().toISOString().slice(0,10);}
 
-/* ---- Day Unlock (previous day quiz >= 60%) ---- */
-function isDayUnlocked(day){if(day<=1)return true;return getProgress(day-1).quizBest>=60;}
+/* ---- Day Unlock (previous day quiz >= 60%; day 15+ unlocked if day 14 done) ---- */
+function isDayUnlocked(day){if(day<=1)return true;if(day<=14)return getProgress(day-1).quizBest>=60;return getProgress(14).quizBest>=60;}
 
 /* Guard: if on a locked day, find highest unlocked day */
 if(!isDayUnlocked(currentDay)){let d=1;for(let i=14;i>=1;i--){if(isDayUnlocked(i)){d=i;break;}}currentDay=d;try{localStorage.setItem('re-currentDay',String(d));}catch{}idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0')||0;}
@@ -620,18 +624,24 @@ function renderDaySwitcher(){
     {n:13,label:'Day 13',sub:'Public Speaking',data:DAY13},
     {n:14,label:'Day 14',sub:'AI & Future',data:DAY14}
   ];
+  // Add generated days (15-20) to the list
+  for(let gd=15;gd<=20;gd++){
+    const gen=getGeneratedDay(gd);
+    const cats=[...new Set(gen.sentences.map(s=>s.cat))].slice(0,2).map(c=>(c.charAt(0).toUpperCase()+c.slice(1))).join('+');
+    days.push({n:gd,label:`Day ${gd}`,sub:cats||'Mixed',data:gen.sentences});
+  }
   let pills='',overview='';
   for(const d of days){
     const p=getProgress(d.n);
     const unlocked=isDayUnlocked(d.n);
     const pct=d.data.length?Math.round(p.learned.length/d.data.length*100):0;
-    const badge=!unlocked?'🔒 LOCKED':p.quizBest>0?`✅ ${p.quizBest}%`:d.n>1&&pct===0?'🆕 NEW':`${pct}%`;
+    const badge=!unlocked?'LOCKED':p.quizBest>0?`${p.quizBest}%`:d.n>1&&pct===0?'NEW':`${pct}%`;
     pills+=`<button class="day-pill${currentDay===d.n?' active':''}${!unlocked?' locked':''}" onclick="switchDay(${d.n})">
       <span class="day-pill-label">${d.label}</span>
       <span class="day-pill-sub">${d.sub}</span>
       <span class="day-pill-badge">${badge}</span>
     </button>`;
-    overview+=`<span class="day-ov-badge${currentDay===d.n?' active':''}${!unlocked?' locked':''}">${d.label} ${unlocked?(p.quizBest>=60?'✅':pct>0?'📖':'🆕'):'🔒'} ${unlocked?pct+'%':'NEW'}</span>`;
+    overview+=`<span class="day-ov-badge${currentDay===d.n?' active':''}${!unlocked?' locked':''}">${d.label} ${unlocked?(p.quizBest>=60?'OK':pct>0?'...':'NEW'):'--'} ${unlocked?pct+'%':'NEW'}</span>`;
   }
   $('#daySwitcher').innerHTML=pills;
   $('#dayOverview').innerHTML=overview;
@@ -678,7 +688,7 @@ function renderStreak(){
   const dots=[];
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const done=p.history&&p.history.includes(ds);const isToday=ds===today;dots.push(`<div class="streak-d${done?' done':''}${isToday?' today':''}"></div>`);}
   $('#streakBar').innerHTML=`
-    <span class="streak-fire">🔥</span>
+    <span class="streak-fire" style="font-size:18px;font-weight:900;color:var(--acc)">*</span>
     <span class="streak-num">${streak}</span>
     <span class="streak-label">day streak</span>
     <div class="streak-dots">${dots.join('')}</div>`;
@@ -706,7 +716,7 @@ function render(){
   const sents=getSentences();
   const scenes=getScenes();
   if(!sents.length){
-    $('#card').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--dim)"><p style="font-size:40px;margin-bottom:12px">📚</p><p>No sentences loaded for this day.</p></div>';
+    $('#card').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--dim)"><p style="font-size:28px;margin-bottom:12px;font-weight:900">---</p><p>No sentences loaded for this day.</p></div>';
     $('#count').textContent='0 / 0';
     $('#prog').style.width='0%';
     return;
@@ -715,7 +725,7 @@ function render(){
   if(idx<0)idx=0;
   const s=sents[idx];
   if(!s)return;
-  const sc=scenes[s.id]||{icon:"💬",colors:["#6366f1","#818cf8"],title:"",sub:""};
+  const sc=scenes[s.id]||{icon:"...",colors:["#6366f1","#818cf8"],title:"",sub:""};
   const p=getProgress();
   const tog=$('#cnToggle');
   tog.classList.toggle('on',cnMode);
@@ -735,7 +745,7 @@ function render(){
     const lblCls=stressed?'loud':'';
     return`<div class="stress-word"><div class="stress-dot ${cls}" style="width:${size}px;height:${size}px"></div><span class="stress-label ${lblCls}">${stressed?w.toUpperCase():w}</span></div>`;
   }).join('');
-  const cnHelper=cnMode?`<div class="cn-helper">💡 ${s.cn}</div>`:'';
+  const cnHelper=cnMode?`<div class="cn-helper">${s.cn}</div>`:'';
   $('#card').innerHTML=`
     <div class="cat">${s.cat} · ${idx+1}/${sents.length}</div>
     <div class="scene-card" style="background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})">
@@ -748,10 +758,10 @@ function render(){
     <div class="sentence">${s.text}</div>
     <div class="ipa">${s.ipa}</div>
     <div class="audio-row">
-      <button class="audio-btn primary" id="playBtn" onclick="window.speak()" aria-label="Listen to sentence">🔊 Listen</button>
-      <button class="audio-btn slow" onclick="window.speakSlow()" aria-label="Listen slowly">🐢 Slow</button>
-      <button class="audio-btn" style="background:#f59e0b" onclick="window.rhythmPlay()" aria-label="Play rhythm animation">🎵 Rhythm</button>
-      <button class="audio-btn rec-btn" id="recBtn" onclick="window.toggleRecord()" aria-label="Record your voice">🎙️ Record</button>
+      <button class="audio-btn primary" id="playBtn" onclick="window.speak()" aria-label="Listen to sentence">&#9654; Listen</button>
+      <button class="audio-btn slow" onclick="window.speakSlow()" aria-label="Listen slowly">0.7x Slow</button>
+      <button class="audio-btn" style="background:#f59e0b" onclick="window.rhythmPlay()" aria-label="Play rhythm animation">&#9835; Rhythm</button>
+      <button class="audio-btn rec-btn" id="recBtn" onclick="window.toggleRecord()" aria-label="Record your voice">&#9679; Record</button>
     </div>
     <div id="recCompare"></div>
     <div class="section">
@@ -767,11 +777,11 @@ function render(){
       <div class="variants">${s.variants.map(v=>`<div class="variant">${v}</div>`).join('')}</div>
     </div>
     <div class="section">
-      <div class="section-label">⚡ Rhythm tip</div>
+      <div class="section-label">RHYTHM TIP</div>
       <div class="tip">${s.tip}</div>
     </div>
     <div class="section">
-      <div class="section-label">❌ Non-native trap</div>
+      <div class="section-label">TRAP</div>
       <div class="trap">${s.trap}</div>
     </div>
     ${!cnMode?`<div class="cn-reveal">
@@ -779,9 +789,9 @@ function render(){
       <div class="cn-text">${s.cn}</div>
     </div>`:''}
     <button class="learn-btn ${p.learned.includes(s.id)?'learned':'unlearned'}" onclick="window.toggleLearned()" aria-label="${p.learned.includes(s.id)?'Unmark as learned':'Mark as learned'}" aria-pressed="${p.learned.includes(s.id)?'true':'false'}">
-      ${p.learned.includes(s.id)?'✅ Learned!':'Mark as Learned'}
+      ${p.learned.includes(s.id)?'&#10003; Learned!':'Mark as Learned'}
     </button>
-    ${p.learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()" aria-label="Start quiz with '+p.learned.length+' learned sentences">🧠 Quiz Me! ('+p.learned.length+' sentences)</button>':''}
+    ${p.learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()" aria-label="Start quiz with '+p.learned.length+' learned sentences">Quiz Me! ('+p.learned.length+' sentences)</button>':''}
   `;
   renderStreak();
   renderDaySwitcher();
@@ -884,7 +894,7 @@ async function startRecording(){
       isRecording=false;
       if(recTimerId){clearInterval(recTimerId);recTimerId=null;}
       const btn=document.getElementById('recBtn');
-      if(btn){btn.classList.remove('recording');btn.innerHTML='🎙️ Record';}
+      if(btn){btn.classList.remove('recording');btn.innerHTML='&#9679; Record';}
       renderRecCompare();
       await analyzeAndScore();
     };
@@ -892,7 +902,7 @@ async function startRecording(){
     isRecording=true;
     recStartTime=Date.now();
     const btn=document.getElementById('recBtn');
-    if(btn){btn.classList.add('recording');btn.innerHTML='⏹️ <span class="rec-timer">0.0s</span>';}
+    if(btn){btn.classList.add('recording');btn.innerHTML='&#9632; <span class="rec-timer">0.0s</span>';}
     recTimerId=setInterval(()=>{
       const el=document.querySelector('.rec-timer');
       if(el)el.textContent=((Date.now()-recStartTime)/1000).toFixed(1)+'s';
@@ -906,7 +916,7 @@ function stopRecording(){
   isRecording=false;
   if(recTimerId){clearInterval(recTimerId);recTimerId=null;}
   const btn=document.getElementById('recBtn');
-  if(btn){btn.classList.remove('recording');btn.innerHTML='🎙️ Record';}
+  if(btn){btn.classList.remove('recording');btn.innerHTML='&#9679; Record';}
 }
 
 window.toggleRecord=async function(){
@@ -1009,7 +1019,7 @@ function renderScoreRing(score,dS,pS,uDur,nDur){
   if(detail){
     const durPct=Math.round(Math.max(0,Math.min(100,dS/60*100)));
     const pPct=Math.round(Math.max(0,Math.min(100,pS/40*100)));
-    detail.innerHTML=`⏱ Duration: ${uDur?uDur.toFixed(1):'?'}s vs ${nDur?nDur.toFixed(1):'?'}s (${durPct}%) · 🎵 Rhythm: ${pPct}%`;
+    detail.innerHTML=`Duration: ${uDur?uDur.toFixed(1):'?'}s vs ${nDur?nDur.toFixed(1):'?'}s (${durPct}%) · Rhythm: ${pPct}%`;
   }
   setTimeout(()=>{
     const fg=el.querySelector('.score-ring-fg');
@@ -1043,11 +1053,11 @@ function renderRecCompare(){
   const history=getRecHistory(s.id);
   if(!hasRec&&history.length===0){el.innerHTML='';return;}
   let html='<div class="compare-area">';
-  html+='<div class="compare-label">🎙️ Record & Compare</div>';
+  html+='<div class="compare-label">RECORD &amp; COMPARE</div>';
   if(hasRec){
     html+=`<div class="compare-btns">
-      <button class="compare-btn native" id="cmpNative" onclick="window.playNative()">🔊 Native</button>
-      <button class="compare-btn user" id="cmpUser" onclick="window.playUser()">🎤 You</button>
+      <button class="compare-btn native" id="cmpNative" onclick="window.playNative()">&#9654; Native</button>
+      <button class="compare-btn user" id="cmpUser" onclick="window.playUser()">&#9679; You</button>
     </div>
     <div class="waveform-wrap">
       <div class="waveform-box"><label>Native</label><canvas class="waveform-canvas" id="waveNative"></canvas></div>
@@ -1222,8 +1232,8 @@ const Quiz={
     });
     const fb=$('#quizFeedback');
     fb.className='quiz-feedback '+(correct?'right':'wrong');
-    fb.textContent=correct?['🎉 Perfect!','✅ Nailed it!','💪 You got it!'][Math.floor(Math.random()*3)]:
-      `❌ It's: ${q.answer}`;
+    fb.textContent=correct?['Perfect!','Nailed it!','You got it!'][Math.floor(Math.random()*3)]:
+      `Nope — ${q.answer}`;
     $('#quizNextBtn').style.display='block';
   },
 
@@ -1238,22 +1248,22 @@ const Quiz={
     const xpEarned=this.score*10;
     addXP(xpEarned);
     // Save best quiz score for current day & check unlocks
-    const unlockNames=['Day 2: Negotiations','Day 3: Leadership','Day 4: Product/Tech','Day 5: Conflict Resolution','Day 6: Networking','Day 7: Crisis Communication','Day 8: Interviews','Day 9: Presentations','Day 10: Cross-Cultural','Day 11: Remote Work','Day 12: Sales','Day 13: Public Speaking','Day 14: AI & Future'];
+    const unlockNames=['Day 2: Negotiations','Day 3: Leadership','Day 4: Product/Tech','Day 5: Conflict Resolution','Day 6: Networking','Day 7: Crisis Communication','Day 8: Interviews','Day 9: Presentations','Day 10: Cross-Cultural','Day 11: Remote Work','Day 12: Sales','Day 13: Public Speaking','Day 14: AI & Future','Day 15+: Infinite Practice'];
     const unlocksBefore=[];
-    for(let u=2;u<=14;u++)unlocksBefore.push(isDayUnlocked(u));
+    for(let u=2;u<=15;u++)unlocksBefore.push(isDayUnlocked(u));
     const p=getProgress();
     p.quizBest=Math.max(p.quizBest||0,pct);
     updateStreakIfNeeded(p);
     saveProgress(p);
     const unlocksAfter=[];
-    for(let u=2;u<=14;u++)unlocksAfter.push(isDayUnlocked(u));
+    for(let u=2;u<=15;u++)unlocksAfter.push(isDayUnlocked(u));
     let unlockHtml='';
-    for(let u=0;u<13;u++){if(!unlocksBefore[u]&&unlocksAfter[u])unlockHtml+=`<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">🎉 ${unlockNames[u]} unlocked!</div>`;}
+    for(let u=0;u<14;u++){if(!unlocksBefore[u]&&unlocksAfter[u])unlockHtml+=`<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">* ${unlockNames[u]} unlocked!</div>`;}
     $('#quizContent').innerHTML=`
       <div class="quiz-score">
         <div class="quiz-score-num">${pct}%</div>
         <div class="quiz-score-label">${this.score}/${this.questions.length} correct</div>
-        <div class="quiz-xp">+${xpEarned} XP ⚡</div>
+        <div class="quiz-xp">+${xpEarned} XP</div>
       </div>
       ${unlockHtml}
       <button class="quiz-next-btn" onclick="Quiz.close()" style="margin-top:20px">Done</button>
