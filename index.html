@@ -476,6 +476,45 @@ body>*{position:relative;z-index:1}
 }
 .rec-hist-item.active{border-color:var(--emerald)!important;box-shadow:0 0 8px rgba(52,211,153,.15)}
 
+/* ========== SPACED REPETITION & DAILY CHALLENGE ========== */
+
+/* Review overlay */
+.review-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(165deg,var(--bg) 0%,var(--bg2) 100%);z-index:100;display:none;flex-direction:column;padding:env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 20px);overflow-y:auto}
+.review-overlay.active{display:flex}
+
+/* SR Rating buttons */
+.sr-rating-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.sr-rate-btn{flex:1;min-width:70px;padding:14px 8px;border-radius:14px;border:none;font-size:14px;font-weight:700;cursor:pointer;color:white;text-align:center;transition:transform .15s,box-shadow .15s;line-height:1.3}
+.sr-rate-btn:active{transform:scale(.93)}
+.sr-rate-btn span{font-size:11px;font-weight:400;opacity:.8;display:block;margin-top:2px}
+.sr-again{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 2px 12px rgba(239,68,68,.3)}
+.sr-hard{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 2px 12px rgba(245,158,11,.3)}
+.sr-good{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 2px 12px rgba(16,185,129,.3)}
+.sr-easy{background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 2px 12px rgba(99,102,241,.3)}
+
+/* Challenge overlay */
+.challenge-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(165deg,var(--bg) 0%,var(--bg2) 100%);z-index:100;display:none;flex-direction:column;padding:env(safe-area-inset-top) 20px calc(env(safe-area-inset-bottom) + 20px);overflow-y:auto}
+.challenge-overlay.active{display:flex}
+
+/* Timer */
+.dc-timer-wrap{background:var(--card);padding:6px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.08)}
+.dc-timer{font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;color:var(--ok)}
+.dc-timer-bar-wrap{height:4px;background:#1e1e2e;border-radius:2px;margin-bottom:16px;overflow:hidden}
+.dc-timer-bar{height:100%;background:linear-gradient(90deg,var(--ok),var(--acc));border-radius:2px;transition:width .25s linear}
+
+/* Challenge streak */
+.dc-streak-display{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px 20px;background:var(--card);border-radius:14px;border:1px solid rgba(240,180,41,.15)}
+
+/* Menu action buttons */
+.menu-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.menu-action-btn{flex:1;min-width:140px;padding:14px 16px;border-radius:14px;border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,box-shadow .15s;position:relative}
+.menu-action-btn:active{transform:scale(.96)}
+.menu-action-btn.review-btn{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(99,102,241,.08));color:var(--pri);border:1.5px solid rgba(99,102,241,.25)}
+.menu-action-btn.review-btn:hover{box-shadow:0 0 16px rgba(99,102,241,.15)}
+.menu-action-btn.challenge-btn{background:linear-gradient(135deg,rgba(240,180,41,.15),rgba(240,180,41,.08));color:var(--acc);border:1.5px solid rgba(240,180,41,.25)}
+.menu-action-btn.challenge-btn:hover{box-shadow:0 0 16px rgba(240,180,41,.15)}
+.sr-badge{position:absolute;top:-6px;right:-6px;background:var(--red);color:white;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 2px 6px rgba(239,68,68,.4)}
+
 /* ========== END PREMIUM OVERHAUL ========== */
 </style>
 </head>
@@ -503,6 +542,14 @@ body>*{position:relative;z-index:1}
 <div class="quiz-overlay" id="quizOverlay" role="dialog" aria-modal="true" aria-label="Quiz">
   <div class="quiz-progress" id="quizProgress" role="progressbar" aria-label="Quiz progress"></div>
   <div id="quizContent"></div>
+</div>
+<!-- Review overlay (Spaced Repetition) -->
+<div class="review-overlay" id="reviewOverlay" role="dialog" aria-modal="true" aria-label="Review">
+  <div id="reviewContent"></div>
+</div>
+<!-- Daily Challenge overlay -->
+<div class="challenge-overlay" id="challengeOverlay" role="dialog" aria-modal="true" aria-label="Daily Challenge">
+  <div id="challengeContent"></div>
 </div>
 
 <div class="nav">
@@ -792,6 +839,14 @@ function render(){
       ${p.learned.includes(s.id)?'&#10003; Learned!':'Mark as Learned'}
     </button>
     ${p.learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()" aria-label="Start quiz with '+p.learned.length+' learned sentences">Quiz Me! ('+p.learned.length+' sentences)</button>':''}
+    <div class="menu-actions">
+      <button class="menu-action-btn review-btn" onclick="SR.start()" aria-label="Review due cards">
+        📚 Review${(typeof SR!=='undefined'&&SR.getDueCount()>0)?'<span class="sr-badge" id="srBadge">'+SR.getDueCount()+'</span>':''}
+      </button>
+      <button class="menu-action-btn challenge-btn" onclick="DailyChallenge.start()" aria-label="Daily Challenge">
+        ⚡ Daily Challenge
+      </button>
+    </div>
   `;
   renderStreak();
   renderDaySwitcher();
@@ -1140,7 +1195,8 @@ document.addEventListener('touchend',e=>{
   if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?go(1):go(-1);}
 },{passive:true});
 document.addEventListener('keydown',e=>{
-  if($('#quizOverlay').classList.contains('active'))return;
+  if(e.key==='Escape'){if($('#reviewOverlay').classList.contains('active')){SR.close();return;}if($('#challengeOverlay').classList.contains('active')){DailyChallenge.close();return;}}
+  if($('#quizOverlay').classList.contains('active')||$('#reviewOverlay').classList.contains('active')||$('#challengeOverlay').classList.contains('active'))return;
   if(e.key==='ArrowRight')go(1);
   if(e.key==='ArrowLeft')go(-1);
   if(e.key===' '){e.preventDefault();window.speak();}
@@ -1226,6 +1282,7 @@ const Quiz={
     const correct=picked===q.answer;
     this.results.push(correct);
     if(correct)this.score++;
+    else if(typeof SR!=='undefined')SR.addCard(q.sentenceId,currentDay);
     document.querySelectorAll('.quiz-opt').forEach((el,j)=>{
       if(q.options[j]===q.answer)el.classList.add('correct');
       else if(j===i&&!correct)el.classList.add('wrong');
@@ -1282,6 +1339,294 @@ const Quiz={
   }
 };
 window.Quiz=Quiz;
+
+/* ---- Spaced Repetition (SR) ---- */
+const SR={
+  KEY:'sr_cards',
+  _queue:[],_currentIdx:0,_revealed:false,_audio:null,
+
+  getCards(){try{return JSON.parse(localStorage.getItem(this.KEY)||'[]');}catch{return[];}},
+  saveCards(cards){try{localStorage.setItem(this.KEY,JSON.stringify(cards));}catch(e){console.warn('SR save failed',e);}},
+
+  addCard(sentenceId,dayNum){
+    const cards=this.getCards();
+    const d=dayNum||currentDay;
+    if(cards.find(c=>c.sentenceId===sentenceId&&c.dayNum===d))return;
+    const now=Date.now();
+    cards.push({sentenceId,dayNum:d,lastReview:now,interval:60000,easeFactor:2.5,dueDate:now});
+    this.saveCards(cards);
+  },
+
+  getDueCards(){const now=Date.now();return this.getCards().filter(c=>c.dueDate<=now);},
+  getDueCount(){return this.getDueCards().length;},
+
+  rate(sentenceId,dayNum,rating){
+    const cards=this.getCards();
+    const card=cards.find(c=>c.sentenceId===sentenceId&&c.dayNum===dayNum);
+    if(!card)return;
+    const now=Date.now();
+    card.lastReview=now;
+    switch(rating){
+      case'again':card.interval=60000;card.easeFactor=Math.max(1.3,card.easeFactor-0.2);break;
+      case'hard':card.interval=Math.round(card.interval*1.2);card.easeFactor=Math.max(1.3,card.easeFactor-0.1);break;
+      case'good':card.interval=Math.round(card.interval*card.easeFactor);break;
+      case'easy':card.interval=Math.round(card.interval*card.easeFactor*1.3);card.easeFactor+=0.1;break;
+    }
+    card.dueDate=now+card.interval;
+    this.saveCards(cards);
+  },
+
+  findSentence(card){
+    if(card.dayNum<=14)return(ALL_DAYS[card.dayNum-1]||[]).find(s=>s.id===card.sentenceId);
+    return(getGeneratedDay(card.dayNum).sentences||[]).find(s=>s.id===card.sentenceId);
+  },
+
+  _formatInterval(ms){
+    if(ms<60000)return'<1m';if(ms<3600000)return Math.round(ms/60000)+'m';
+    if(ms<86400000)return Math.round(ms/3600000)+'h';return Math.round(ms/86400000)+'d';
+  },
+
+  start(){
+    this._queue=this.getDueCards();
+    if(!this._queue.length){alert('No cards due for review! 🎉');return;}
+    this._currentIdx=0;this._revealed=false;
+    document.getElementById('reviewOverlay').classList.add('active');
+    this.renderCard();
+  },
+
+  renderCard(){
+    const card=this._queue[this._currentIdx];
+    if(!card){this.showComplete();return;}
+    const sentence=this.findSentence(card);
+    if(!sentence){this._currentIdx++;this.renderCard();return;}
+    const total=this._queue.length,current=this._currentIdx+1;
+    const dots=sentence.words.map((w,i)=>{
+      const stressed=sentence.stress[i]>=0.8,mid=sentence.stress[i]>=0.4&&sentence.stress[i]<0.8;
+      const size=stressed?36:mid?22:14,cls=stressed?'big':'small',lblCls=stressed?'loud':'';
+      return`<div class="stress-word"><div class="stress-dot ${cls}" style="width:${size}px;height:${size}px"></div><span class="stress-label ${lblCls}">${stressed?w.toUpperCase():w}</span></div>`;
+    }).join('');
+    let html=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <button class="nav-btn" onclick="SR.close()" aria-label="Close review" style="font-size:16px">✕</button>
+        <span style="color:var(--dim);font-size:13px">${current} / ${total} due</span>
+      </div>
+      <div style="text-align:center;margin-bottom:20px">
+        <div class="cat">Day ${card.dayNum} · Review</div>
+        <div class="stress-row">${dots}</div>
+        <div class="sentence">${sentence.text}</div>
+        <div class="ipa">${sentence.ipa}</div>
+        <div class="audio-row" style="margin-top:16px">
+          <button class="audio-btn primary" onclick="SR.playAudio(1)" aria-label="Listen">▶ Listen</button>
+          <button class="audio-btn slow" onclick="SR.playAudio(0.7)" aria-label="Listen slowly">0.7x</button>
+        </div>
+      </div>`;
+    if(this._revealed){
+      html+=`
+        <div style="text-align:center;margin:20px 0">
+          <div class="cn-helper">${sentence.cn}</div>
+          <div style="margin-top:12px;font-size:13px;color:var(--dim)">${sentence.meaning}</div>
+        </div>
+        <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--dim);margin-bottom:8px">How well did you remember?</div>
+        <div class="sr-rating-row">
+          <button class="sr-rate-btn sr-again" onclick="SR.rateAndNext('again')">Again<br><span>1m</span></button>
+          <button class="sr-rate-btn sr-hard" onclick="SR.rateAndNext('hard')">Hard<br><span>${this._formatInterval(card.interval*1.2)}</span></button>
+          <button class="sr-rate-btn sr-good" onclick="SR.rateAndNext('good')">Good<br><span>${this._formatInterval(card.interval*card.easeFactor)}</span></button>
+          <button class="sr-rate-btn sr-easy" onclick="SR.rateAndNext('easy')">Easy<br><span>${this._formatInterval(card.interval*card.easeFactor*1.3)}</span></button>
+        </div>`;
+    }else{
+      html+=`<button class="quiz-next-btn" onclick="SR.reveal()" style="margin-top:20px">Show Answer</button>`;
+    }
+    document.getElementById('reviewContent').innerHTML=html;
+  },
+
+  playAudio(rate){
+    if(this._audio){this._audio.pause();this._audio=null;}
+    if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();
+    const card=this._queue[this._currentIdx];if(!card)return;
+    const sentence=this.findSentence(card);if(!sentence)return;
+    const id=String(sentence.id).padStart(2,'0');
+    this._audio=new Audio('audio/'+id+'.mp3');
+    this._audio.playbackRate=rate||1;
+    this._audio.onerror=()=>{
+      if(typeof speechSynthesis!=='undefined'){
+        const u=new SpeechSynthesisUtterance(sentence.text);
+        u.lang='en-US';u.rate=(rate||1)*0.85;speechSynthesis.speak(u);
+      }
+    };
+    this._audio.play().catch(()=>{if(this._audio&&this._audio.onerror)this._audio.onerror();});
+  },
+
+  reveal(){this._revealed=true;this.renderCard();},
+
+  rateAndNext(rating){
+    const card=this._queue[this._currentIdx];
+    if(card)this.rate(card.sentenceId,card.dayNum,rating);
+    this._currentIdx++;this._revealed=false;
+    if(this._audio){this._audio.pause();this._audio=null;}
+    this.renderCard();
+  },
+
+  showComplete(){
+    document.getElementById('reviewContent').innerHTML=`
+      <div style="text-align:center;padding:60px 20px">
+        <div style="font-size:48px;margin-bottom:16px">🎉</div>
+        <div style="font-size:24px;font-weight:900;margin-bottom:8px">All Done!</div>
+        <div style="color:var(--dim);margin-bottom:24px">No more cards due for review</div>
+        <button class="quiz-next-btn" onclick="SR.close()">Back</button>
+      </div>`;
+  },
+
+  close(){
+    document.getElementById('reviewOverlay').classList.remove('active');
+    if(this._audio){this._audio.pause();this._audio=null;}
+    render();
+  }
+};
+window.SR=SR;
+
+/* ---- Daily Challenge ---- */
+const DailyChallenge={
+  KEY_BEST:'dc_best',KEY_STREAK:'dc_streak',
+  _questions:[],_current:0,_score:0,_timer:null,_timeLeft:90,_startTime:0,_results:[],_answered:false,
+
+  _seedHash(str){let h=0;for(let i=0;i<str.length;i++)h=((h<<5)-h+str.charCodeAt(i))|0;return Math.abs(h);},
+  _seededRng(seed){let s=seed||1;return function(){s=(s*16807)%2147483647;return(s-1)/2147483646;};},
+
+  getAllSentences(){
+    const all=[];
+    for(let d=1;d<=14;d++){if(isDayUnlocked(d))ALL_DAYS[d-1].forEach(s=>all.push({...s,dayNum:d}));}
+    for(let d=15;d<=20;d++){if(isDayUnlocked(d))getGeneratedDay(d).sentences.forEach(s=>all.push({...s,dayNum:d}));}
+    return all;
+  },
+
+  generateQuestions(){
+    const dateStr=new Date().toDateString();
+    const seed=this._seedHash(dateStr);
+    const rng=this._seededRng(seed);
+    const allS=this.getAllSentences();
+    if(allS.length<10)return false;
+    const shuffled=[...allS];
+    for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+    const selected=shuffled.slice(0,10);
+    this._questions=[];
+    for(const s of selected){
+      const qType=rng();
+      if(qType<0.5){
+        const wrong=[...allS].filter(x=>x.id!==s.id||x.dayNum!==s.dayNum);
+        for(let i=wrong.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[wrong[i],wrong[j]]=[wrong[j],wrong[i]];}
+        const opts=[s.cn,...wrong.slice(0,3).map(x=>x.cn)];
+        for(let i=opts.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+        this._questions.push({prompt:s.text,hint:'What does this mean?',options:opts,answer:s.cn,sentenceId:s.id,dayNum:s.dayNum});
+      }else{
+        const wrong=[...allS].filter(x=>x.id!==s.id||x.dayNum!==s.dayNum);
+        for(let i=wrong.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[wrong[i],wrong[j]]=[wrong[j],wrong[i]];}
+        const opts=[s.text,...wrong.slice(0,3).map(x=>x.text)];
+        for(let i=opts.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+        this._questions.push({prompt:s.cn,hint:'Which English sentence?',options:opts,answer:s.text,sentenceId:s.id,dayNum:s.dayNum});
+      }
+    }
+    return this._questions.length>=3;
+  },
+
+  getBest(){return parseInt(localStorage.getItem(this.KEY_BEST)||'0');},
+  getStreak(){try{return JSON.parse(localStorage.getItem(this.KEY_STREAK)||'{"count":0,"lastDate":null}');}catch{return{count:0,lastDate:null};}},
+
+  start(){
+    if(!this.generateQuestions()){alert('Not enough sentences available! Unlock more days first.');return;}
+    this._current=0;this._score=0;this._timeLeft=90;this._results=[];this._answered=false;this._startTime=Date.now();
+    document.getElementById('challengeOverlay').classList.add('active');
+    this._startTimer();this.renderQuestion();
+  },
+
+  _startTimer(){
+    if(this._timer)clearInterval(this._timer);
+    this._timer=setInterval(()=>{
+      this._timeLeft=Math.max(0,90-Math.floor((Date.now()-this._startTime)/1000));
+      const el=document.getElementById('dcTimer');
+      if(el){el.textContent=this._timeLeft+'s';el.style.color=this._timeLeft<=10?'var(--red)':this._timeLeft<=30?'var(--acc)':'var(--ok)';}
+      const bar=document.getElementById('dcTimerBar');
+      if(bar)bar.style.width=(this._timeLeft/90*100)+'%';
+      if(this._timeLeft<=0){clearInterval(this._timer);this._timer=null;this.timeUp();}
+    },250);
+  },
+
+  renderQuestion(){
+    if(this._current>=this._questions.length){this.showResults();return;}
+    const q=this._questions[this._current];this._answered=false;
+    const total=this._questions.length,current=this._current+1;
+    document.getElementById('challengeContent').innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span style="color:var(--dim);font-size:13px">${current}/${total}</span>
+        <div class="dc-timer-wrap"><span class="dc-timer" id="dcTimer">${this._timeLeft}s</span></div>
+        <span style="color:var(--acc);font-size:13px;font-weight:700">Score: ${this._score}</span>
+      </div>
+      <div class="dc-timer-bar-wrap"><div class="dc-timer-bar" id="dcTimerBar" style="width:${this._timeLeft/90*100}%"></div></div>
+      <div class="quiz-progress" style="margin-bottom:16px">${this._questions.map((_,i)=>{
+        let cls='quiz-pip';if(i<this._current)cls+=this._results[i]?' done':' wrong';else if(i===this._current)cls+=' current';return'<div class="'+cls+'"></div>';
+      }).join('')}</div>
+      <div class="quiz-q">${q.prompt}</div>
+      <div class="quiz-hint">${q.hint}</div>
+      <div class="quiz-opts">${q.options.map((o,i)=>
+        '<div class="quiz-opt" onclick="DailyChallenge.pick('+i+')" tabindex="0" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();DailyChallenge.pick('+i+')}">'+o+'</div>'
+      ).join('')}</div>
+      <div id="dcFeedback"></div>`;
+  },
+
+  pick(i){
+    if(this._answered)return;this._answered=true;
+    const q=this._questions[this._current],picked=q.options[i],correct=picked===q.answer;
+    this._results.push(correct);
+    if(correct){this._score+=100+this._timeLeft;}
+    else{SR.addCard(q.sentenceId,q.dayNum);}
+    document.querySelectorAll('#challengeContent .quiz-opt').forEach((el,j)=>{
+      if(q.options[j]===q.answer)el.classList.add('correct');
+      else if(j===i&&!correct)el.classList.add('wrong');
+    });
+    const fb=document.getElementById('dcFeedback');
+    if(fb){fb.className='quiz-feedback '+(correct?'right':'wrong');fb.textContent=correct?'+'+(100+this._timeLeft)+' pts!':'Nope — '+q.answer;}
+    setTimeout(()=>{this._current++;this.renderQuestion();},800);
+  },
+
+  timeUp(){while(this._results.length<this._questions.length)this._results.push(false);this.showResults();},
+
+  showResults(){
+    if(this._timer){clearInterval(this._timer);this._timer=null;}
+    const best=this.getBest(),isNewBest=this._score>best;
+    if(isNewBest)try{localStorage.setItem(this.KEY_BEST,String(this._score));}catch{}
+    const today=new Date().toDateString(),streakData=this.getStreak();
+    if(streakData.lastDate!==today){
+      const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+      streakData.count=streakData.lastDate===yesterday.toDateString()?(streakData.count||0)+1:1;
+      streakData.lastDate=today;
+      try{localStorage.setItem(this.KEY_STREAK,JSON.stringify(streakData));}catch{}
+    }
+    const correctCount=this._results.filter(r=>r).length;
+    const xpEarned=correctCount*15;addXP(xpEarned);
+    document.getElementById('challengeContent').innerHTML=`
+      <div style="text-align:center;padding:30px 0">
+        <div style="font-size:48px;margin-bottom:12px">${isNewBest?'🏆':'⚡'}</div>
+        <div style="font-size:48px;font-weight:900;background:linear-gradient(135deg,var(--acc),var(--ok));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">${this._score}</div>
+        <div style="color:var(--dim);font-size:14px;margin-bottom:4px">${correctCount}/${this._questions.length} correct</div>
+        <div style="color:var(--acc);font-size:16px;font-weight:700;margin:8px 0">+${xpEarned} XP</div>
+        ${isNewBest?'<div style="color:var(--ok);font-size:16px;font-weight:700;margin:12px 0">🎉 New Personal Best!</div>':'<div style="color:var(--dim);font-size:13px;margin:12px 0">Personal Best: '+Math.max(best,this._score)+'</div>'}
+        <div class="dc-streak-display">
+          <span style="font-size:28px">🔥</span>
+          <span style="font-size:24px;font-weight:900;color:var(--acc)">${streakData.count}</span>
+          <span style="color:var(--dim);font-size:13px">day streak</span>
+        </div>
+        <div style="margin-top:24px">
+          <button class="quiz-next-btn" onclick="DailyChallenge.close()">Done</button>
+        </div>
+      </div>`;
+  },
+
+  close(){
+    document.getElementById('challengeOverlay').classList.remove('active');
+    if(this._timer){clearInterval(this._timer);this._timer=null;}
+    render();
+  }
+};
+window.DailyChallenge=DailyChallenge;
 
 /* ---- Init ---- */
 updateXP();
