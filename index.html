@@ -518,11 +518,20 @@ import{DAY4,SCENES_DAY4}from'./data/day4.js';
 import{DAY5,SCENES_DAY5}from'./data/day5.js';
 import{DAY6,SCENES_DAY6}from'./data/day6.js';
 import{DAY7,SCENES_DAY7}from'./data/day7.js';
+import{DAY8,SCENES_DAY8}from'./data/day8.js';
+import{DAY9,SCENES_DAY9}from'./data/day9.js';
+import{DAY10,SCENES_DAY10}from'./data/day10.js';
+import{DAY11,SCENES_DAY11}from'./data/day11.js';
+import{DAY12,SCENES_DAY12}from'./data/day12.js';
+import{DAY13,SCENES_DAY13}from'./data/day13.js';
+import{DAY14,SCENES_DAY14}from'./data/day14.js';
 
 /* ---- Day Management ---- */
 let currentDay=parseInt(localStorage.getItem('re-currentDay')||'1')||1;
-function getSentences(){return[DAY1,DAY2,DAY3,DAY4,DAY5,DAY6,DAY7][currentDay-1]||DAY1;}
-function getScenes(){return[SCENES,SCENES_DAY2,SCENES_DAY3,SCENES_DAY4,SCENES_DAY5,SCENES_DAY6,SCENES_DAY7][currentDay-1]||SCENES;}
+const ALL_DAYS=[DAY1,DAY2,DAY3,DAY4,DAY5,DAY6,DAY7,DAY8,DAY9,DAY10,DAY11,DAY12,DAY13,DAY14];
+const ALL_SCENES=[SCENES,SCENES_DAY2,SCENES_DAY3,SCENES_DAY4,SCENES_DAY5,SCENES_DAY6,SCENES_DAY7,SCENES_DAY8,SCENES_DAY9,SCENES_DAY10,SCENES_DAY11,SCENES_DAY12,SCENES_DAY13,SCENES_DAY14];
+function getSentences(){return ALL_DAYS[currentDay-1]||DAY1;}
+function getScenes(){return ALL_SCENES[currentDay-1]||SCENES;}
 
 /* ---- Migrate old single-day progress (one-time) ---- */
 (function(){
@@ -573,8 +582,8 @@ function todayStr(){return new Date().toISOString().slice(0,10);}
 /* ---- Day Unlock (previous day quiz >= 60%) ---- */
 function isDayUnlocked(day){if(day<=1)return true;return getProgress(day-1).quizBest>=60;}
 
-/* Guard: if on a locked day, reset to Day 1 */
-if(!isDayUnlocked(currentDay)){currentDay=1;try{localStorage.setItem('re-currentDay','1');}catch{}idx=parseInt(localStorage.getItem('re-idx-day1')||'0')||0;}
+/* Guard: if on a locked day, find highest unlocked day */
+if(!isDayUnlocked(currentDay)){let d=1;for(let i=14;i>=1;i--){if(isDayUnlocked(i)){d=i;break;}}currentDay=d;try{localStorage.setItem('re-currentDay',String(d));}catch{}idx=parseInt(localStorage.getItem(`re-idx-day${currentDay}`)||'0')||0;}
 
 /* ---- Switch Day ---- */
 window.switchDay=function(day){
@@ -602,7 +611,14 @@ function renderDaySwitcher(){
     {n:4,label:'Day 4',sub:'Product/Tech',data:DAY4},
     {n:5,label:'Day 5',sub:'Conflict',data:DAY5},
     {n:6,label:'Day 6',sub:'Networking',data:DAY6},
-    {n:7,label:'Day 7',sub:'Crisis',data:DAY7}
+    {n:7,label:'Day 7',sub:'Crisis',data:DAY7},
+    {n:8,label:'Day 8',sub:'Interviews',data:DAY8},
+    {n:9,label:'Day 9',sub:'Presentations',data:DAY9},
+    {n:10,label:'Day 10',sub:'Cross-Cultural',data:DAY10},
+    {n:11,label:'Day 11',sub:'Remote Work',data:DAY11},
+    {n:12,label:'Day 12',sub:'Sales',data:DAY12},
+    {n:13,label:'Day 13',sub:'Public Speaking',data:DAY13},
+    {n:14,label:'Day 14',sub:'AI & Future',data:DAY14}
   ];
   let pills='',overview='';
   for(const d of days){
@@ -1222,17 +1238,17 @@ const Quiz={
     const xpEarned=this.score*10;
     addXP(xpEarned);
     // Save best quiz score for current day & check unlocks
-    const unlockNames=['Day 2: Negotiations','Day 3: Leadership','Day 4: Product/Tech','Day 5: Conflict Resolution','Day 6: Networking','Day 7: Crisis Communication'];
+    const unlockNames=['Day 2: Negotiations','Day 3: Leadership','Day 4: Product/Tech','Day 5: Conflict Resolution','Day 6: Networking','Day 7: Crisis Communication','Day 8: Interviews','Day 9: Presentations','Day 10: Cross-Cultural','Day 11: Remote Work','Day 12: Sales','Day 13: Public Speaking','Day 14: AI & Future'];
     const unlocksBefore=[];
-    for(let u=2;u<=7;u++)unlocksBefore.push(isDayUnlocked(u));
+    for(let u=2;u<=14;u++)unlocksBefore.push(isDayUnlocked(u));
     const p=getProgress();
     p.quizBest=Math.max(p.quizBest||0,pct);
     updateStreakIfNeeded(p);
     saveProgress(p);
     const unlocksAfter=[];
-    for(let u=2;u<=7;u++)unlocksAfter.push(isDayUnlocked(u));
+    for(let u=2;u<=14;u++)unlocksAfter.push(isDayUnlocked(u));
     let unlockHtml='';
-    for(let u=0;u<6;u++){if(!unlocksBefore[u]&&unlocksAfter[u])unlockHtml+=`<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">🎉 ${unlockNames[u]} unlocked!</div>`;}
+    for(let u=0;u<13;u++){if(!unlocksBefore[u]&&unlocksAfter[u])unlockHtml+=`<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">🎉 ${unlockNames[u]} unlocked!</div>`;}
     $('#quizContent').innerHTML=`
       <div class="quiz-score">
         <div class="quiz-score-num">${pct}%</div>

@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v12';
+const CACHE = 'rhythm-v13';
 const ASSETS = [
   './',
   './index.html',
@@ -9,11 +9,19 @@ const ASSETS = [
   './data/day5.js',
   './data/day6.js',
   './data/day7.js',
+  './data/day8.js',
+  './data/day9.js',
+  './data/day10.js',
+  './data/day11.js',
+  './data/day12.js',
+  './data/day13.js',
+  './data/day14.js',
+  './data/generator.js',
   './manifest.json'
 ];
 // Pre-cache audio files for Day 1 (01-30)
 for (let i = 1; i <= 30; i++) ASSETS.push(`./audio/${String(i).padStart(2,'0')}.mp3`);
-// Day 2 audio (31-60) cached on demand via network-first strategy
+// Day 2-14 audio cached on demand via network-first strategy
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -32,8 +40,8 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(r => {
       if (r) return r;
       return fetch(e.request).then(response => {
-        // Cache audio files on first fetch (Day 2 audio)
-        if (response.ok && e.request.url.includes('/audio/')) {
+        // Cache audio and data files on first fetch
+        if (response.ok && (e.request.url.includes('/audio/') || e.request.url.includes('/data/'))) {
           const clone = response.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }
