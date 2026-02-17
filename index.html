@@ -10,92 +10,99 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#64748b;--r:16px}
-html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none}
-.app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}
-/* Header */
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none;overflow-x:hidden}
+.app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 80px)}
+/* Header — sticky */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;position:sticky;top:0;background:var(--bg);z-index:10}
 .hdr h1{font-size:18px;font-weight:700}
-.hdr .badge{background:var(--pri);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
-.progress-bar{height:4px;background:#1e1e2e;border-radius:2px;margin-bottom:8px;position:sticky;top:48px;z-index:10}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.badge{background:var(--pri);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.mode-toggle{display:flex;align-items:center;gap:6px}
+.mode-toggle label{font-size:11px;color:var(--dim)}
+.toggle{position:relative;width:36px;height:20px;background:#1e1e2e;border-radius:10px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--pri)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left .2s}
+.toggle.on::after{left:18px}
+/* Progress */
+.progress-bar{height:3px;background:#1e1e2e;border-radius:2px;margin-bottom:12px;position:sticky;top:46px;z-index:10}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--pri),var(--acc));border-radius:2px;transition:width .3s}
-/* Card */
-.card-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;position:relative;padding-bottom:80px}
-.card{background:var(--card);border-radius:var(--r);padding:28px 24px;width:100%;max-width:400px;transition:transform .3s,opacity .3s}
-.card.slide-l{transform:translateX(-120%);opacity:0}
-.card.slide-r{transform:translateX(120%);opacity:0}
-/* Scene card visual */
-.scene-card{background:linear-gradient(135deg,var(--sc1,#6366f1),var(--sc2,#818cf8));border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
-.scene-card::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);pointer-events:none}
-.scene-icon{font-size:36px;margin-bottom:4px}
-.scene-title{font-size:22px;font-weight:800;color:white;letter-spacing:1px}
-.scene-sub{font-size:13px;color:rgba(255,255,255,.8);margin-top:2px}
-.cat{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
-/* Stress visual */
-.stress-row{display:flex;gap:6px;justify-content:center;align-items:flex-end;margin-bottom:20px;min-height:60px}
-.stress-word{display:flex;flex-direction:column;align-items:center;gap:4px}
-.stress-dot{border-radius:50%;background:var(--pri);transition:all .3s}
-.stress-label{font-size:11px;color:var(--dim)}
+/* Scene card — the big visual */
+.scene-card{border-radius:16px;padding:24px 20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.scene-card::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 70%);pointer-events:none}
+.scene-icon{font-size:40px;margin-bottom:6px;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3))}
+.scene-title{font-size:24px;font-weight:900;color:white;letter-spacing:2px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+.scene-sub{font-size:13px;color:rgba(255,255,255,.85);margin-top:4px;font-weight:500}
+/* Category tag */
+.cat{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center}
+/* Chinese helper — always visible in CN mode */
+.cn-helper{font-size:14px;color:var(--acc);background:rgba(245,158,11,0.08);padding:10px 14px;border-radius:10px;margin-bottom:14px;text-align:center;border:1px solid rgba(245,158,11,0.15);line-height:1.5}
+/* Stress visualization — the core visual */
+.stress-row{display:flex;gap:4px;justify-content:center;align-items:flex-end;margin-bottom:16px;min-height:70px;flex-wrap:wrap;padding:8px 0}
+.stress-word{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:28px}
+.stress-dot{border-radius:50%;transition:all .3s}
+.stress-dot.big{background:var(--acc);box-shadow:0 0 8px rgba(245,158,11,0.4)}
+.stress-dot.small{background:var(--pri);opacity:.4}
+.stress-label{font-size:11px;color:var(--dim);line-height:1.2}
+.stress-label.loud{color:var(--acc);font-weight:800;font-size:12px}
 /* Sentence */
-.sentence{font-size:22px;font-weight:700;text-align:center;line-height:1.4;margin-bottom:6px}
-.ipa{font-size:13px;color:var(--dim);text-align:center;margin-bottom:20px;font-family:'Courier New',monospace}
+.sentence{font-size:22px;font-weight:700;text-align:center;line-height:1.4;margin-bottom:4px}
+.ipa{font-size:12px;color:var(--dim);text-align:center;margin-bottom:16px;font-family:'Courier New',monospace;opacity:.7}
+/* Audio buttons */
+.audio-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.audio-btn{border:none;color:white;padding:10px 22px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .1s;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.audio-btn:active{transform:scale(.93)}
+.audio-btn.primary{background:var(--pri)}
+.audio-btn.slow{background:var(--ok)}
+.audio-btn.playing{animation:audioPulse 1s ease infinite}
+@keyframes audioPulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 8px rgba(99,102,241,0)}}
 /* Sections */
-.section{margin-bottom:16px}
-.section-label{font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
-.section-text{font-size:14px;line-height:1.5;color:var(--txt)}
-.trap{color:#f87171;font-style:italic;font-size:13px}
-.tip{color:var(--ok);font-size:13px}
+.section{margin-bottom:14px}
+.section-label{font-size:10px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;font-weight:700}
+.section-text{font-size:14px;line-height:1.6;color:var(--txt)}
+.trap{color:#f87171;font-style:italic;font-size:13px;padding:6px 10px;background:rgba(248,113,113,0.06);border-radius:8px;border-left:3px solid #f87171}
+.tip{color:var(--ok);font-size:13px;padding:6px 10px;background:rgba(16,185,129,0.06);border-radius:8px;border-left:3px solid var(--ok)}
 /* Variants */
 .variants{display:flex;flex-direction:column;gap:6px}
-.variant{background:#1a1a2e;padding:8px 12px;border-radius:8px;font-size:13px;border-left:3px solid var(--pri)}
+.variant{background:#1a1a2e;padding:8px 12px;border-radius:8px;font-size:13px;border-left:3px solid var(--pri);line-height:1.4}
 /* Pattern */
-.pattern{background:var(--pri);color:white;padding:6px 12px;border-radius:8px;font-size:13px;font-family:'Courier New',monospace;display:inline-block}
+.pattern{background:rgba(99,102,241,0.12);color:var(--pri);padding:6px 12px;border-radius:8px;font-size:13px;font-family:'Courier New',monospace;display:inline-block;border:1px solid rgba(99,102,241,0.2)}
 /* Chinese reveal */
-.cn-reveal{text-align:center;margin-top:12px}
-.cn-btn{background:none;border:1px dashed var(--dim);color:var(--dim);padding:6px 16px;border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s}
+.cn-reveal{text-align:center;margin-top:12px;padding:12px 0}
+.cn-btn{background:none;border:1px dashed var(--dim);color:var(--dim);padding:8px 20px;border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s}
 .cn-btn:active{background:var(--dim);color:var(--bg)}
-.cn-text{font-size:14px;color:var(--dim);display:none;margin-top:6px}
+.cn-text{font-size:14px;color:var(--dim);display:none;margin-top:8px}
 .cn-text.show{display:block}
-/* Nav */
-.nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
-.nav-btn{background:var(--card);border:none;color:var(--txt);width:48px;height:48px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
-.nav-btn:active{background:var(--pri)}
-.nav-btn:disabled{opacity:.2}
-.nav-count{font-size:14px;color:var(--dim)}
-/* Audio btn */
-.audio-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
-.audio-btn{background:var(--pri);border:none;color:white;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .1s}
-.audio-btn:active{transform:scale(.95)}
-/* Chinese mode toggle */
-.mode-toggle{display:flex;align-items:center;gap:8px;justify-content:center;padding:8px 0}
-.mode-toggle label{font-size:12px;color:var(--dim)}
-.toggle{position:relative;width:40px;height:22px;background:#1e1e2e;border-radius:11px;cursor:pointer;transition:background .2s}
-.toggle.on{background:var(--pri)}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:white;border-radius:50%;transition:left .2s}
-.toggle.on::after{left:20px}
-/* CN helper text */
-.cn-helper{font-size:13px;color:var(--acc);background:#1a1a2e;padding:8px 12px;border-radius:8px;margin-bottom:12px;display:none;text-align:center;border-left:3px solid var(--acc)}
-.cn-helper.show{display:block}
+/* Nav — fixed bottom */
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 24px calc(env(safe-area-inset-bottom,8px) + 8px);background:linear-gradient(transparent,var(--bg) 20%);z-index:20}
+.nav-btn{background:var(--card);border:none;color:var(--txt);width:48px;height:48px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.nav-btn:active{background:var(--pri);transform:scale(.9)}
+.nav-btn:disabled{opacity:.15}
+.nav-count{font-size:13px;color:var(--dim)}
+/* Card animation */
+.card{background:var(--card);border-radius:var(--r);padding:24px 20px;width:100%;max-width:400px;margin:0 auto;transition:transform .25s ease,opacity .25s ease}
+.card.slide-l{transform:translateX(-110%);opacity:0}
+.card.slide-r{transform:translateX(110%);opacity:0}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="hdr">
     <h1>🎵 Rhythm English</h1>
-    <div class="badge" id="xp">Day 1</div>
-  </div>
-  <div class="mode-toggle">
-    <label>中文辅助</label>
-    <div class="toggle" id="cnToggle" onclick="toggleCN()"></div>
+    <div class="hdr-right">
+      <div class="mode-toggle">
+        <label>中文</label>
+        <div class="toggle" id="cnToggle" onclick="toggleCN()"></div>
+      </div>
+      <div class="badge" id="xp">Day 1</div>
+    </div>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
-  <div class="card-wrap">
-    <div class="card" id="card"></div>
-  </div>
-  <div class="nav">
-    <button class="nav-btn" id="prev" onclick="go(-1)">←</button>
-    <span class="nav-count" id="count"></span>
-    <button class="nav-btn" id="next" onclick="go(1)">→</button>
-  </div>
+  <div class="card" id="card"></div>
+</div>
+<div class="nav">
+  <button class="nav-btn" id="prev" onclick="go(-1)">←</button>
+  <span class="nav-count" id="count"></span>
+  <button class="nav-btn" id="next" onclick="go(1)">→</button>
 </div>
 <script type="module">
 import{DAY1,SCENES}from'./data/sentences.js';
@@ -103,6 +110,7 @@ let idx=parseInt(localStorage.getItem('re-idx')||'0');
 let cnMode=localStorage.getItem('re-cn')==='1';
 const $=s=>document.querySelector(s);
 let audio=null;
+let isPlaying=false;
 
 window.toggleCN=function(){
   cnMode=!cnMode;
@@ -115,25 +123,26 @@ function render(){
   const s=DAY1[idx];
   if(!s)return;
   const sc=SCENES[s.id]||{icon:"💬",colors:["#6366f1","#818cf8"],title:"",sub:""};
-  // init toggle
   $('#cnToggle').classList.toggle('on',cnMode);
-  // progress
   $('#prog').style.width=((idx+1)/DAY1.length*100)+'%';
   $('#count').textContent=`${idx+1} / ${DAY1.length}`;
   $('#prev').disabled=idx===0;
   $('#next').disabled=idx===DAY1.length-1;
-  // stress dots
+  // Stress dots — big=stressed, small=unstressed
   const dots=s.words.map((w,i)=>{
-    const size=Math.round(16+s.stress[i]*32);
-    const op=(.3+s.stress[i]*.7).toFixed(2);
-    return`<div class="stress-word"><div class="stress-dot" style="width:${size}px;height:${size}px;opacity:${op}"></div><span class="stress-label">${s.stress[i]>=.8?w.toUpperCase():w}</span></div>`;
+    const stressed=s.stress[i]>=0.8;
+    const mid=s.stress[i]>=0.4&&s.stress[i]<0.8;
+    const size=stressed?36:mid?22:14;
+    const cls=stressed?'big':'small';
+    const lblCls=stressed?'loud':'';
+    return`<div class="stress-word"><div class="stress-dot ${cls}" style="width:${size}px;height:${size}px"></div><span class="stress-label ${lblCls}">${stressed?w.toUpperCase():w}</span></div>`;
   }).join('');
-  // Chinese helper (shown in CN mode)
-  const cnHelper=cnMode?`<div class="cn-helper show">💡 ${s.cn}</div>`:'';
-  // card
+  // CN helper
+  const cnHelper=cnMode?`<div class="cn-helper">💡 ${s.cn}</div>`:'';
+  // Card
   $('#card').innerHTML=`
-    <div class="cat">${s.cat} #${s.id}</div>
-    <div class="scene-card" style="--sc1:${sc.colors[0]};--sc2:${sc.colors[1]}">
+    <div class="cat">${s.cat} · ${idx+1}/${DAY1.length}</div>
+    <div class="scene-card" style="background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})">
       <div class="scene-icon">${sc.icon}</div>
       <div class="scene-title">${sc.title}</div>
       <div class="scene-sub">${sc.sub}</div>
@@ -143,11 +152,11 @@ function render(){
     <div class="sentence">${s.text}</div>
     <div class="ipa">${s.ipa}</div>
     <div class="audio-row">
-      <button class="audio-btn" onclick="window.speak()">🔊 Listen</button>
-      <button class="audio-btn" style="background:var(--ok)" onclick="window.speakSlow()">🐢 Slow</button>
+      <button class="audio-btn primary" id="playBtn" onclick="window.speak()">🔊 Listen</button>
+      <button class="audio-btn slow" onclick="window.speakSlow()">🐢 Slow</button>
     </div>
     <div class="section">
-      <div class="section-label">Meaning</div>
+      <div class="section-label">What it means</div>
       <div class="section-text">${s.meaning}</div>
     </div>
     <div class="section">
@@ -155,7 +164,7 @@ function render(){
       <div class="pattern">${s.pattern}</div>
     </div>
     <div class="section">
-      <div class="section-label">Same Pattern</div>
+      <div class="section-label">Same pattern</div>
       <div class="variants">${s.variants.map(v=>`<div class="variant">${v}</div>`).join('')}</div>
     </div>
     <div class="section">
@@ -164,59 +173,63 @@ function render(){
     </div>
     <div class="section">
       <div class="section-label">❌ Non-native trap</div>
-      <div class="trap">"${s.trap}"</div>
+      <div class="trap">${s.trap}</div>
     </div>
     ${!cnMode?`<div class="cn-reveal">
-      <button class="cn-btn" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Reveal 中文'?'Hide':'Reveal 中文'">Reveal 中文</button>
+      <button class="cn-btn" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Reveal 中文'?'Hide 中文':'Reveal 中文'">Reveal 中文</button>
       <div class="cn-text">${s.cn}</div>
     </div>`:''}
   `;
+  // Scroll to top on card change
+  window.scrollTo({top:0,behavior:'smooth'});
   localStorage.setItem('re-idx',idx);
 }
 
-window.speak=function(){
-  if(audio){audio.pause();audio=null;}
+function playAudio(rate=1){
+  if(audio){audio.pause();audio.currentTime=0;}
   const id=String(DAY1[idx].id).padStart(2,'0');
   audio=new Audio('audio/'+id+'.mp3');
-  audio.play().catch(()=>{
-    // fallback to speech synthesis
+  audio.playbackRate=rate;
+  const btn=document.getElementById('playBtn');
+  audio.onplay=()=>{if(btn)btn.classList.add('playing');};
+  audio.onended=()=>{if(btn)btn.classList.remove('playing');};
+  audio.onerror=()=>{
+    if(btn)btn.classList.remove('playing');
     const u=new SpeechSynthesisUtterance(DAY1[idx].text);
-    u.lang='en-US';u.rate=.85;
+    u.lang='en-US';u.rate=rate*0.85;
     speechSynthesis.speak(u);
-  });
-};
+  };
+  audio.play().catch(()=>audio.onerror());
+}
 
-window.speakSlow=function(){
-  if(audio){audio.pause();audio=null;}
-  const id=String(DAY1[idx].id).padStart(2,'0');
-  audio=new Audio('audio/'+id+'.mp3');
-  audio.playbackRate=0.7;
-  audio.play().catch(()=>{
-    const u=new SpeechSynthesisUtterance(DAY1[idx].text);
-    u.lang='en-US';u.rate=.55;
-    speechSynthesis.speak(u);
-  });
-};
+window.speak=function(){playAudio(1);};
+window.speakSlow=function(){playAudio(0.7);};
 
-window.go=function(d){
+window.go=function(dir){
   const card=$('#card');
-  card.classList.add(d>0?'slide-l':'slide-r');
+  card.classList.add(dir>0?'slide-l':'slide-r');
   setTimeout(()=>{
-    idx=Math.max(0,Math.min(DAY1.length-1,idx+d));
+    idx=Math.max(0,Math.min(DAY1.length-1,idx+dir));
     card.classList.remove('slide-l','slide-r');
     render();
   },200);
 };
 
-// Swipe — only horizontal, don't block vertical scroll
+// Swipe — horizontal only, don't block scroll
 let sx=0,sy=0;
 document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
 document.addEventListener('touchend',e=>{
   const dx=e.changedTouches[0].clientX-sx;
   const dy=e.changedTouches[0].clientY-sy;
-  // Only trigger swipe if horizontal movement > vertical (not scrolling)
-  if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5){dx<0?go(1):go(-1)}
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?go(1):go(-1);}
 },{passive:true});
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')go(1);
+  if(e.key==='ArrowLeft')go(-1);
+  if(e.key===' '){e.preventDefault();window.speak();}
+});
 
 render();
 </script>
