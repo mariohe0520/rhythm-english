@@ -230,11 +230,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 <script type="module">
 import{DAY1,SCENES}from'./data/sentences.js';
 import{DAY2,SCENES_DAY2}from'./data/day2.js';
+import{DAY3,SCENES_DAY3}from'./data/day3.js';
+import{DAY4,SCENES_DAY4}from'./data/day4.js';
 
 /* ---- Day Management ---- */
 let currentDay=parseInt(localStorage.getItem('re-currentDay')||'1');
-function getSentences(){return currentDay===1?DAY1:DAY2;}
-function getScenes(){return currentDay===1?SCENES:SCENES_DAY2;}
+function getSentences(){return[DAY1,DAY2,DAY3,DAY4][currentDay-1]||DAY1;}
+function getScenes(){return[SCENES,SCENES_DAY2,SCENES_DAY3,SCENES_DAY4][currentDay-1]||SCENES;}
 
 /* ---- Migrate old single-day progress (one-time) ---- */
 (function(){
@@ -281,15 +283,18 @@ function saveProgress(p,day){
 }
 function todayStr(){return new Date().toISOString().slice(0,10);}
 
-/* ---- Day 2 Unlock (Day 1 quiz >= 60%) ---- */
+/* ---- Day Unlock (previous day quiz >= 60%) ---- */
 function isDay2Unlocked(){return getProgress(1).quizBest>=60;}
+function isDay3Unlocked(){return getProgress(2).quizBest>=60;}
+function isDay4Unlocked(){return getProgress(3).quizBest>=60;}
+function isDayUnlocked(day){return[()=>true,isDay2Unlocked,isDay3Unlocked,isDay4Unlocked][day-1]?.[]()||day===1;}
 
-/* Guard: if on Day 2 but locked, reset to Day 1 */
-if(currentDay===2&&!isDay2Unlocked()){currentDay=1;localStorage.setItem('re-currentDay','1');idx=parseInt(localStorage.getItem('re-idx-day1')||'0');}
+/* Guard: if on a locked day, reset to Day 1 */
+if(!isDayUnlocked(currentDay)){currentDay=1;localStorage.setItem('re-currentDay','1');idx=parseInt(localStorage.getItem('re-idx-day1')||'0');}
 
 /* ---- Switch Day ---- */
 window.switchDay=function(day){
-  if(day===2&&!isDay2Unlocked())return;
+  if(!isDayUnlocked(day))return;
   localStorage.setItem(`re-idx-day${currentDay}`,String(idx));
   currentDay=day;
   localStorage.setItem('re-currentDay',String(day));
@@ -303,26 +308,27 @@ window.switchDay=function(day){
 
 /* ---- Render Day Switcher & Overview ---- */
 function renderDaySwitcher(){
-  const p1=getProgress(1),p2=getProgress(2);
-  const unlocked2=isDay2Unlocked();
-  const pct1=DAY1.length?Math.round(p1.learned.length/DAY1.length*100):0;
-  const pct2=DAY2.length?Math.round(p2.learned.length/DAY2.length*100):0;
-  const badge1=p1.quizBest>0?`✅ ${p1.quizBest}%`:`${pct1}%`;
-  const badge2=unlocked2?(p2.quizBest>0?`✅ ${p2.quizBest}%`:'🆕 NEW'):'🔒 LOCKED';
-  $('#daySwitcher').innerHTML=`
-    <button class="day-pill${currentDay===1?' active':''}" onclick="switchDay(1)">
-      <span class="day-pill-label">Day 1</span>
-      <span class="day-pill-sub">Business Meeting</span>
-      <span class="day-pill-badge">${badge1}</span>
-    </button>
-    <button class="day-pill${currentDay===2?' active':''}${!unlocked2?' locked':''}" onclick="switchDay(2)">
-      <span class="day-pill-label">Day 2</span>
-      <span class="day-pill-sub">Negotiations</span>
-      <span class="day-pill-badge">${badge2}</span>
+  const days=[
+    {n:1,label:'Day 1',sub:'Business Meeting',data:DAY1},
+    {n:2,label:'Day 2',sub:'Negotiations',data:DAY2},
+    {n:3,label:'Day 3',sub:'Leadership',data:DAY3},
+    {n:4,label:'Day 4',sub:'Product/Tech',data:DAY4}
+  ];
+  let pills='',overview='';
+  for(const d of days){
+    const p=getProgress(d.n);
+    const unlocked=isDayUnlocked(d.n);
+    const pct=d.data.length?Math.round(p.learned.length/d.data.length*100):0;
+    const badge=!unlocked?'🔒 LOCKED':p.quizBest>0?`✅ ${p.quizBest}%`:d.n>1&&pct===0?'🆕 NEW':`${pct}%`;
+    pills+=`<button class="day-pill${currentDay===d.n?' active':''}${!unlocked?' locked':''}" onclick="switchDay(${d.n})">
+      <span class="day-pill-label">${d.label}</span>
+      <span class="day-pill-sub">${d.sub}</span>
+      <span class="day-pill-badge">${badge}</span>
     </button>`;
-  $('#dayOverview').innerHTML=`
-    <span class="day-ov-badge${currentDay===1?' active':''}">Day 1 ${p1.quizBest>=60?'✅':pct1>0?'📖':''} ${pct1}%</span>
-    <span class="day-ov-badge${currentDay===2?' active':''}${!unlocked2?' locked':''}">Day 2 ${unlocked2?(p2.quizBest>=60?'✅':'🆕'):'🔒'} ${unlocked2?pct2+'%':'NEW'}</span>`;
+    overview+=`<span class="day-ov-badge${currentDay===d.n?' active':''}${!unlocked?' locked':''}">${d.label} ${unlocked?(p.quizBest>=60?'✅':pct>0?'📖':'🆕'):'🔒'} ${unlocked?pct+'%':'NEW'}</span>`;
+  }
+  $('#daySwitcher').innerHTML=pills;
+  $('#dayOverview').innerHTML=overview;
   $('#dayBadge').textContent=`Day ${currentDay}`;
 }
 
@@ -916,20 +922,23 @@ const Quiz={
     const pct=Math.round(this.score/this.questions.length*100);
     const xpEarned=this.score*10;
     addXP(xpEarned);
-    // Save best quiz score for current day
-    const wasDay2Unlocked=isDay2Unlocked();
+    // Save best quiz score for current day & check unlocks
+    const unlocksBefore=[isDay2Unlocked(),isDay3Unlocked(),isDay4Unlocked()];
     const p=getProgress();
     p.quizBest=Math.max(p.quizBest||0,pct);
     updateStreakIfNeeded(p);
     saveProgress(p);
-    const day2JustUnlocked=currentDay===1&&!wasDay2Unlocked&&isDay2Unlocked();
+    const unlocksAfter=[isDay2Unlocked(),isDay3Unlocked(),isDay4Unlocked()];
+    const unlockNames=['Day 2: Negotiations','Day 3: Leadership','Day 4: Product/Tech'];
+    let unlockHtml='';
+    for(let u=0;u<3;u++){if(!unlocksBefore[u]&&unlocksAfter[u])unlockHtml+=`<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">🎉 ${unlockNames[u]} unlocked!</div>`;}
     $('#quizContent').innerHTML=`
       <div class="quiz-score">
         <div class="quiz-score-num">${pct}%</div>
         <div class="quiz-score-label">${this.score}/${this.questions.length} correct</div>
         <div class="quiz-xp">+${xpEarned} XP ⚡</div>
       </div>
-      ${day2JustUnlocked?'<div style="text-align:center;margin:16px 0;padding:16px;background:rgba(16,185,129,.1);border-radius:12px;font-size:15px;color:var(--ok);font-weight:700">🎉 Day 2: Negotiations unlocked!</div>':''}
+      ${unlockHtml}
       <button class="quiz-next-btn" onclick="Quiz.close()" style="margin-top:20px">Done</button>
     `;
     $('#quizProgress').innerHTML=this.questions.map((_,i)=>{

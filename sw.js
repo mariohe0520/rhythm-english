@@ -1,9 +1,11 @@
-const CACHE = 'rhythm-v9';
+const CACHE = 'rhythm-v10';
 const ASSETS = [
   './',
   './index.html',
   './data/sentences.js',
   './data/day2.js',
+  './data/day3.js',
+  './data/day4.js',
   './manifest.json'
 ];
 // Pre-cache audio files for Day 1 (01-30)
