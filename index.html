@@ -9,9 +9,9 @@
 <link rel="manifest" href="manifest.json">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#64748b;--red:#ef4444;--r:16px}
+:root{--bg:#0a0a0f;--card:#14141f;--pri:#6366f1;--acc:#f59e0b;--ok:#10b981;--txt:#f1f5f9;--dim:#94a3b8;--red:#ef4444;--r:16px}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none;overflow-x:hidden}
-.app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 80px)}
+.app{display:flex;flex-direction:column;min-height:100%;padding:env(safe-area-inset-top) max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 80px) max(16px,env(safe-area-inset-left))}
 /* Header — sticky */
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;position:sticky;top:0;background:var(--bg);z-index:10}
 .hdr h1{font-size:18px;font-weight:700}
@@ -19,10 +19,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .badge{background:var(--pri);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
 .mode-toggle{display:flex;align-items:center;gap:6px}
 .mode-toggle label{font-size:11px;color:var(--dim)}
-.toggle{position:relative;width:36px;height:20px;background:#1e1e2e;border-radius:10px;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle{position:relative;width:36px;height:20px;background:#1e1e2e;border-radius:10px;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;outline:none;-webkit-appearance:none;appearance:none}
+.toggle::before{content:'';position:absolute;top:50%;left:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .toggle.on{background:var(--pri)}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;background:white;border-radius:50%;transition:left .2s}
 .toggle.on::after{left:18px}
+.toggle:focus-visible{outline:2px solid var(--pri);outline-offset:4px;border-radius:10px}
 /* Progress */
 .progress-bar{height:3px;background:#1e1e2e;border-radius:2px;margin-bottom:12px;position:sticky;top:46px;z-index:10}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--pri),var(--acc));border-radius:2px;transition:width .3s}
@@ -46,10 +48,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .stress-label.loud{color:var(--acc);font-weight:800;font-size:12px}
 /* Sentence */
 .sentence{font-size:22px;font-weight:700;text-align:center;line-height:1.4;margin-bottom:4px}
-.ipa{font-size:12px;color:var(--dim);text-align:center;margin-bottom:16px;font-family:'Courier New',monospace;opacity:.7}
+.ipa{font-size:12px;color:var(--dim);text-align:center;margin-bottom:16px;font-family:'Courier New',monospace}
 /* Audio buttons */
 .audio-row{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
-.audio-btn{border:none;color:white;padding:10px 22px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .1s;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.audio-btn{border:none;color:white;padding:12px 22px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .1s;box-shadow:0 2px 8px rgba(0,0,0,.2);min-height:44px}
 .audio-btn:active{transform:scale(.93)}
 .audio-btn.primary{background:var(--pri)}
 .audio-btn.slow{background:var(--ok)}
@@ -68,13 +70,15 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .pattern{background:rgba(99,102,241,0.12);color:var(--pri);padding:6px 12px;border-radius:8px;font-size:13px;font-family:'Courier New',monospace;display:inline-block;border:1px solid rgba(99,102,241,0.2)}
 /* Chinese reveal */
 .cn-reveal{text-align:center;margin-top:12px;padding:12px 0}
-.cn-btn{background:none;border:1px dashed var(--dim);color:var(--dim);padding:8px 20px;border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s}
+.cn-btn{background:none;border:1px dashed var(--dim);color:var(--dim);padding:12px 20px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s;min-height:44px}
 .cn-btn:active{background:var(--dim);color:var(--bg)}
 .cn-text{font-size:14px;color:var(--dim);display:none;margin-top:8px}
 .cn-text.show{display:block}
 /* Nav — fixed bottom */
 .nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:12px 24px calc(env(safe-area-inset-bottom,8px) + 8px);background:linear-gradient(transparent,var(--bg) 20%);z-index:20}
 .nav-btn{background:var(--card);border:none;color:var(--txt);width:48px;height:48px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.nav-btn:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .nav-btn:active{background:var(--pri);transform:scale(.9)}
 .nav-btn:disabled{opacity:.15}
 .nav-count{font-size:13px;color:var(--dim)}
@@ -110,7 +114,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .quiz-q{font-size:18px;font-weight:700;text-align:center;margin:20px 0 12px;line-height:1.4}
 .quiz-hint{font-size:13px;color:var(--dim);text-align:center;margin-bottom:20px}
 .quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.quiz-opt{padding:16px;border-radius:12px;background:var(--card);border:2px solid transparent;font-size:15px;color:var(--txt);cursor:pointer;text-align:left;transition:all .15s;line-height:1.4}
+.quiz-opt{padding:16px;border-radius:12px;background:var(--card);border:2px solid transparent;font-size:15px;color:var(--txt);cursor:pointer;text-align:left;transition:all .15s;line-height:1.4;min-height:44px}
+.quiz-opt:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 .quiz-opt:active{transform:scale(.97)}
 .quiz-opt.selected{border-color:var(--acc);background:rgba(99,102,241,.1)}
 .quiz-opt.correct{border-color:var(--ok);background:rgba(16,185,129,.1)}
@@ -198,29 +203,29 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
     <div class="hdr-right">
       <div class="mode-toggle">
         <label>中文</label>
-        <div class="toggle" id="cnToggle" onclick="toggleCN()"></div>
+        <button class="toggle" id="cnToggle" onclick="toggleCN()" role="switch" aria-checked="false" aria-label="Toggle Chinese mode"></button>
       </div>
       <div class="xp-display">⚡<span class="xp-num" id="xpNum">0</span></div>
       <div class="badge" id="dayBadge">Day 1</div>
     </div>
   </div>
   <div class="streak-bar" id="streakBar"></div>
-  <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Learning progress" id="progBar"><div class="progress-fill" id="prog"></div></div>
   <div class="complete-summary" id="completeSummary"></div>
   <div class="day-switcher" id="daySwitcher"></div>
   <div class="day-overview" id="dayOverview"></div>
   <div class="card" id="card"></div>
 </div>
 <!-- Quiz overlay -->
-<div class="quiz-overlay" id="quizOverlay">
-  <div class="quiz-progress" id="quizProgress"></div>
+<div class="quiz-overlay" id="quizOverlay" role="dialog" aria-modal="true" aria-label="Quiz">
+  <div class="quiz-progress" id="quizProgress" role="progressbar" aria-label="Quiz progress"></div>
   <div id="quizContent"></div>
 </div>
 
 <div class="nav">
-  <button class="nav-btn" id="prev" onclick="go(-1)">←</button>
-  <span class="nav-count" id="count"></span>
-  <button class="nav-btn" id="next" onclick="go(1)">→</button>
+  <button class="nav-btn" id="prev" onclick="go(-1)" aria-label="Previous sentence">←</button>
+  <span class="nav-count" id="count" aria-live="polite"></span>
+  <button class="nav-btn" id="next" onclick="go(1)" aria-label="Next sentence">→</button>
 </div>
 <script type="module">
 import{DAY1,SCENES}from'./data/sentences.js';
@@ -256,9 +261,19 @@ function getAudioCtx(){
 function getRecHistory(sid){return JSON.parse(localStorage.getItem(`re-rec-${sid}`)||'[]');}
 
 /* ---- Progress (per-day) ---- */
+const DEFAULT_PROGRESS={learned:[],streak:0,lastDate:null,history:[],quizBest:0};
 function getProgress(day){
   const d=day||currentDay;
-  return JSON.parse(localStorage.getItem(`re-progress-day${d}`)||'{"learned":[],"streak":0,"lastDate":null,"history":[],"quizBest":0}');
+  try{
+    const raw=localStorage.getItem(`re-progress-day${d}`);
+    if(!raw)return JSON.parse(JSON.stringify(DEFAULT_PROGRESS));
+    const p=JSON.parse(raw);
+    // Ensure all fields exist (forward compat)
+    return{...JSON.parse(JSON.stringify(DEFAULT_PROGRESS)),...p};
+  }catch(e){
+    console.warn('Progress data corrupted, resetting day',d,e);
+    return JSON.parse(JSON.stringify(DEFAULT_PROGRESS));
+  }
 }
 function saveProgress(p,day){
   const d=day||currentDay;
@@ -311,19 +326,30 @@ function renderDaySwitcher(){
   $('#dayBadge').textContent=`Day ${currentDay}`;
 }
 
+/* ---- Streak Helper (DRY) ---- */
+function updateStreakIfNeeded(p){
+  const today=todayStr();
+  if(p.lastDate!==today){
+    if(p.lastDate){
+      const d=new Date(p.lastDate);d.setDate(d.getDate()+1);
+      p.streak=d.toISOString().slice(0,10)===today?(p.streak||0)+1:1;
+    }else p.streak=1;
+    p.lastDate=today;
+    if(!p.history)p.history=[];
+    if(!p.history.includes(today))p.history.push(today);
+  }
+  return p;
+}
+
 /* ---- Toggle Learned ---- */
 window.toggleLearned=function(){
   const sents=getSentences();
+  if(!sents.length)return;
   const p=getProgress();
   const sid=sents[idx].id;
   const i=p.learned.indexOf(sid);
   if(i>=0)p.learned.splice(i,1);else p.learned.push(sid);
-  const today=todayStr();
-  if(p.lastDate!==today){
-    if(p.lastDate){const d=new Date(p.lastDate);d.setDate(d.getDate()+1);if(d.toISOString().slice(0,10)===today)p.streak++;else p.streak=1;}else p.streak=1;
-    p.lastDate=today;
-    if(!p.history.includes(today))p.history.push(today);
-  }
+  updateStreakIfNeeded(p);
   saveProgress(p);
   render();
 };
@@ -348,7 +374,9 @@ function renderStreak(){
 window.toggleCN=function(){
   cnMode=!cnMode;
   localStorage.setItem('re-cn',cnMode?'1':'0');
-  $('#cnToggle').classList.toggle('on',cnMode);
+  const tog=$('#cnToggle');
+  tog.classList.toggle('on',cnMode);
+  tog.setAttribute('aria-checked',String(cnMode));
   render();
 };
 
@@ -357,12 +385,25 @@ function render(){
   if(isRecording)stopRecording();
   const sents=getSentences();
   const scenes=getScenes();
+  if(!sents.length){
+    $('#card').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--dim)"><p style="font-size:40px;margin-bottom:12px">📚</p><p>No sentences loaded for this day.</p></div>';
+    $('#count').textContent='0 / 0';
+    $('#prog').style.width='0%';
+    return;
+  }
+  if(idx>=sents.length)idx=sents.length-1;
+  if(idx<0)idx=0;
   const s=sents[idx];
   if(!s)return;
   const sc=scenes[s.id]||{icon:"💬",colors:["#6366f1","#818cf8"],title:"",sub:""};
   const p=getProgress();
-  $('#cnToggle').classList.toggle('on',cnMode);
-  $('#prog').style.width=((idx+1)/sents.length*100)+'%';
+  const tog=$('#cnToggle');
+  tog.classList.toggle('on',cnMode);
+  tog.setAttribute('aria-checked',String(cnMode));
+  const pctVal=Math.round((idx+1)/sents.length*100);
+  $('#prog').style.width=pctVal+'%';
+  const progBar=$('#progBar');
+  if(progBar){progBar.setAttribute('aria-valuenow',String(pctVal));}
   $('#count').textContent=`${idx+1} / ${sents.length}`;
   $('#prev').disabled=idx===0;
   $('#next').disabled=idx===sents.length-1;
@@ -387,10 +428,10 @@ function render(){
     <div class="sentence">${s.text}</div>
     <div class="ipa">${s.ipa}</div>
     <div class="audio-row">
-      <button class="audio-btn primary" id="playBtn" onclick="window.speak()">🔊 Listen</button>
-      <button class="audio-btn slow" onclick="window.speakSlow()">🐢 Slow</button>
-      <button class="audio-btn" style="background:#f59e0b" onclick="window.rhythmPlay()">🎵 Rhythm</button>
-      <button class="audio-btn rec-btn" id="recBtn" onclick="window.toggleRecord()">🎙️ Record</button>
+      <button class="audio-btn primary" id="playBtn" onclick="window.speak()" aria-label="Listen to sentence">🔊 Listen</button>
+      <button class="audio-btn slow" onclick="window.speakSlow()" aria-label="Listen slowly">🐢 Slow</button>
+      <button class="audio-btn" style="background:#f59e0b" onclick="window.rhythmPlay()" aria-label="Play rhythm animation">🎵 Rhythm</button>
+      <button class="audio-btn rec-btn" id="recBtn" onclick="window.toggleRecord()" aria-label="Record your voice">🎙️ Record</button>
     </div>
     <div id="recCompare"></div>
     <div class="section">
@@ -417,10 +458,10 @@ function render(){
       <button class="cn-btn" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Reveal 中文'?'Hide 中文':'Reveal 中文'">Reveal 中文</button>
       <div class="cn-text">${s.cn}</div>
     </div>`:''}
-    <button class="learn-btn ${p.learned.includes(s.id)?'learned':'unlearned'}" onclick="window.toggleLearned()">
+    <button class="learn-btn ${p.learned.includes(s.id)?'learned':'unlearned'}" onclick="window.toggleLearned()" aria-label="${p.learned.includes(s.id)?'Unmark as learned':'Mark as learned'}" aria-pressed="${p.learned.includes(s.id)?'true':'false'}">
       ${p.learned.includes(s.id)?'✅ Learned!':'Mark as Learned'}
     </button>
-    ${p.learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()">🧠 Quiz Me! ('+p.learned.length+' sentences)</button>':''}
+    ${p.learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()" aria-label="Start quiz with '+p.learned.length+' learned sentences">🧠 Quiz Me! ('+p.learned.length+' sentences)</button>':''}
   `;
   renderStreak();
   renderDaySwitcher();
@@ -431,8 +472,12 @@ function render(){
 
 /* ---- Audio ---- */
 function playAudio(rate=1){
-  if(audio){audio.pause();audio.currentTime=0;}
-  const s=getSentences()[idx];
+  if(audio){audio.pause();audio.onplay=null;audio.onended=null;audio.onerror=null;audio.src='';audio=null;}
+  speechSynthesis.cancel();
+  const sents=getSentences();
+  if(!sents.length)return;
+  const s=sents[idx];
+  if(!s)return;
   const id=String(s.id).padStart(2,'0');
   audio=new Audio('audio/'+id+'.mp3');
   audio.playbackRate=rate;
@@ -445,21 +490,32 @@ function playAudio(rate=1){
     u.lang='en-US';u.rate=rate*0.85;
     speechSynthesis.speak(u);
   };
-  audio.play().catch(()=>audio.onerror());
+  audio.play().catch(()=>{if(audio&&audio.onerror)audio.onerror();});
 }
 window.speak=function(){playAudio(1);};
 window.speakSlow=function(){playAudio(0.7);};
 
 /* ---- Rhythm Mode (works with any day's sentences) ---- */
+let rhythmTimers=[];
 window.rhythmPlay=function(){
   const s=getSentences()[idx];
   if(!s)return;
+  // Cancel any running rhythm animation
+  rhythmTimers.forEach(t=>clearTimeout(t));
+  rhythmTimers=[];
   playAudio(0.85);
   const words=document.querySelectorAll('.stress-word');
   if(!words.length)return;
   const stressRow=document.querySelector('.stress-row');
   if(!stressRow)return;
   stressRow.querySelectorAll('.rhythm-ball').forEach(b=>b.remove());
+  // Pre-calculate positions to avoid layout thrashing during animation
+  const positions=[];
+  const parentRect=stressRow.getBoundingClientRect();
+  words.forEach(w=>{
+    const r=w.getBoundingClientRect();
+    positions.push(r.left-parentRect.left+r.width/2-6);
+  });
   const ball=document.createElement('div');
   ball.className='rhythm-ball';
   stressRow.style.position='relative';
@@ -468,23 +524,25 @@ window.rhythmPlay=function(){
   s.words.forEach((w,i)=>{
     const stressed=s.stress[i]>=0.8;
     const wordTime=stressed?280:180;
-    setTimeout(()=>{
-      const wordEl=words[i];
-      if(!wordEl)return;
-      const rect=wordEl.getBoundingClientRect();
-      const parentRect=stressRow.getBoundingClientRect();
-      ball.style.left=(rect.left-parentRect.left+rect.width/2-6)+'px';
-      ball.style.top='-16px';
-      ball.className='rhythm-ball'+(stressed?' big':'');
-      ball.style.animation='none';
-      void ball.offsetWidth;
-      ball.style.animation=(stressed?'ballBounceBig':'ballBounce')+' '+(stressed?'0.35s':'0.25s')+' ease';
-      words.forEach(w=>w.classList.remove('active'));
-      wordEl.classList.add('active');
+    const tid=setTimeout(()=>{
+      requestAnimationFrame(()=>{
+        const wordEl=words[i];
+        if(!wordEl||!ball.parentNode)return;
+        ball.style.left=positions[i]+'px';
+        ball.style.top='-16px';
+        ball.className='rhythm-ball'+(stressed?' big':'');
+        ball.style.animation='none';
+        void ball.offsetWidth;
+        ball.style.animation=(stressed?'ballBounceBig':'ballBounce')+' '+(stressed?'0.35s':'0.25s')+' ease';
+        words.forEach(w=>w.classList.remove('active'));
+        wordEl.classList.add('active');
+      });
     },elapsed);
+    rhythmTimers.push(tid);
     elapsed+=wordTime;
   });
-  setTimeout(()=>{ball.remove();words.forEach(w=>w.classList.remove('active'));},elapsed+500);
+  const cleanupTid=setTimeout(()=>{if(ball.parentNode)ball.remove();words.forEach(w=>w.classList.remove('active'));},elapsed+500);
+  rhythmTimers.push(cleanupTid);
 };
 
 /* ---- Record & Compare ---- */
@@ -725,25 +783,33 @@ window.playHistRec=function(i){
   cmpAudio.play();
 };
 
-/* ---- Navigation ---- */
+/* ---- Navigation (debounced) ---- */
+let navLock=false;
 window.go=function(dir){
+  if(navLock)return;
+  navLock=true;
   const sents=getSentences();
+  if(!sents.length){navLock=false;return;}
   const card=$('#card');
   card.classList.add(dir>0?'slide-l':'slide-r');
   setTimeout(()=>{
     idx=Math.max(0,Math.min(sents.length-1,idx+dir));
     card.classList.remove('slide-l','slide-r');
     render();
-  },200);
+    navLock=false;
+  },220);
 };
-let sx=0,sy=0;
-document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+let sx=0,sy=0,swiping=false;
+document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;swiping=true;},{passive:true});
 document.addEventListener('touchend',e=>{
+  if(!swiping)return;
+  swiping=false;
   const dx=e.changedTouches[0].clientX-sx;
   const dy=e.changedTouches[0].clientY-sy;
   if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?go(1):go(-1);}
 },{passive:true});
 document.addEventListener('keydown',e=>{
+  if($('#quizOverlay').classList.contains('active'))return;
   if(e.key==='ArrowRight')go(1);
   if(e.key==='ArrowLeft')go(-1);
   if(e.key===' '){e.preventDefault();window.speak();}
@@ -779,9 +845,12 @@ const Quiz={
         const stressedWords=s.words.filter((_,i)=>s.stress[i]>=0.8);
         if(stressedWords.length===0)continue;
         const target=stressedWords[Math.floor(Math.random()*stressedWords.length)];
-        const wrong=s.words.filter(w=>w!==target&&s.stress[s.words.indexOf(w)]<0.5).slice(0,3);
-        if(wrong.length<2)continue;
-        const opts=[target,...wrong.slice(0,3)].sort(()=>Math.random()-.5);
+        // Fix: use index-aware filter to handle duplicate words correctly
+        const wrong=s.words.filter((_,i)=>s.words[i]!==target&&s.stress[i]<0.5);
+        // Deduplicate wrong options
+        const uniqueWrong=[...new Set(wrong)].slice(0,3);
+        if(uniqueWrong.length<2)continue;
+        const opts=[target,...uniqueWrong].sort(()=>Math.random()-.5);
         this.questions.push({type:'stress',prompt:s.text,hint:'Which word gets the STRONGEST stress?',options:opts,answer:target,sentenceId:s.id});
       }
     }
@@ -790,8 +859,12 @@ const Quiz={
 
   start(){
     if(!this.generate()){alert('Learn at least 5 sentences first!');return;}
+    this._prevFocus=document.activeElement;
     $('#quizOverlay').classList.add('active');
     this.renderQuestion();
+    // Move focus into quiz for accessibility
+    const firstOpt=$('#quizOverlay .quiz-opt');
+    if(firstOpt)setTimeout(()=>firstOpt.focus(),100);
   },
 
   renderQuestion(){
@@ -806,8 +879,8 @@ const Quiz={
     $('#quizContent').innerHTML=`
       <div class="quiz-q">${q.prompt}</div>
       <div class="quiz-hint">${q.hint}</div>
-      <div class="quiz-opts">${q.options.map((o,i)=>
-        `<div class="quiz-opt" data-idx="${i}" onclick="Quiz.pick(${i})">${o}</div>`
+      <div class="quiz-opts" role="radiogroup">${q.options.map((o,i)=>
+        `<div class="quiz-opt" data-idx="${i}" onclick="Quiz.pick(${i})" tabindex="0" role="radio" aria-checked="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();Quiz.pick(${i})}">${o}</div>`
       ).join('')}</div>
       <div id="quizFeedback"></div>
       <button class="quiz-next-btn" id="quizNextBtn" style="display:none" onclick="Quiz.next()">Continue</button>
@@ -847,13 +920,7 @@ const Quiz={
     const wasDay2Unlocked=isDay2Unlocked();
     const p=getProgress();
     p.quizBest=Math.max(p.quizBest||0,pct);
-    const today=todayStr();
-    if(p.lastDate!==today){
-      if(p.lastDate){const d=new Date(p.lastDate);d.setDate(d.getDate()+1);p.streak=d.toISOString().slice(0,10)===today?p.streak+1:1;}
-      else p.streak=1;
-      p.lastDate=today;
-      if(!p.history.includes(today))p.history.push(today);
-    }
+    updateStreakIfNeeded(p);
     saveProgress(p);
     const day2JustUnlocked=currentDay===1&&!wasDay2Unlocked&&isDay2Unlocked();
     $('#quizContent').innerHTML=`
@@ -873,6 +940,8 @@ const Quiz={
   close(){
     $('#quizOverlay').classList.remove('active');
     render();
+    // Restore focus for accessibility
+    if(this._prevFocus&&this._prevFocus.focus)this._prevFocus.focus();
   }
 };
 window.Quiz=Quiz;
