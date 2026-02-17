@@ -130,6 +130,14 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 /* XP display */
 .xp-display{display:flex;align-items:center;gap:4px}
 .xp-num{font-size:13px;font-weight:800;color:var(--acc)}
+/* Rhythm bouncing ball */
+.rhythm-ball{position:absolute;width:12px;height:12px;background:var(--acc);border-radius:50%;box-shadow:0 0 12px rgba(245,158,11,.6);transition:left .15s ease-out;z-index:5;pointer-events:none}
+.rhythm-ball.big{width:18px;height:18px;background:#f59e0b;box-shadow:0 0 20px rgba(245,158,11,.8)}
+@keyframes ballBounce{0%{transform:translateY(0)}40%{transform:translateY(-22px)}100%{transform:translateY(0)}}
+@keyframes ballBounceBig{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-36px) scale(1.4)}100%{transform:translateY(0) scale(1)}}
+.stress-word.active{transform:scale(1.15);transition:transform .15s}
+.stress-word.active .stress-label{color:var(--acc)!important;font-weight:900!important}
+.stress-word.active .stress-dot{box-shadow:0 0 14px rgba(245,158,11,.7)!important}
 </style>
 </head>
 <body>
@@ -259,6 +267,7 @@ function render(){
     <div class="audio-row">
       <button class="audio-btn primary" id="playBtn" onclick="window.speak()">🔊 Listen</button>
       <button class="audio-btn slow" onclick="window.speakSlow()">🐢 Slow</button>
+      <button class="audio-btn" style="background:#f59e0b" onclick="window.rhythmPlay()">🎵 Rhythm</button>
     </div>
     <div class="section">
       <div class="section-label">What it means</div>
@@ -314,6 +323,55 @@ function playAudio(rate=1){
 
 window.speak=function(){playAudio(1);};
 window.speakSlow=function(){playAudio(0.7);};
+
+// ===== RHYTHM MODE — the differentiator =====
+window.rhythmPlay=function(){
+  const s=DAY1[idx];
+  if(!s)return;
+  // Play audio
+  playAudio(0.85);
+  // Animate bouncing ball across stress dots
+  const words=document.querySelectorAll('.stress-word');
+  if(!words.length)return;
+  const stressRow=document.querySelector('.stress-row');
+  if(!stressRow)return;
+  // Remove any existing ball
+  stressRow.querySelectorAll('.rhythm-ball').forEach(b=>b.remove());
+  // Create ball
+  const ball=document.createElement('div');
+  ball.className='rhythm-ball';
+  stressRow.style.position='relative';
+  stressRow.appendChild(ball);
+  // Timing: distribute words across ~2.5s (approximate sentence length)
+  const totalTime=s.words.length*220; // ~220ms per word avg
+  let elapsed=0;
+  s.words.forEach((w,i)=>{
+    const stressed=s.stress[i]>=0.8;
+    const wordTime=stressed?280:180; // stressed words get more time
+    setTimeout(()=>{
+      // Position ball above current word
+      const wordEl=words[i];
+      if(!wordEl)return;
+      const rect=wordEl.getBoundingClientRect();
+      const parentRect=stressRow.getBoundingClientRect();
+      ball.style.left=(rect.left-parentRect.left+rect.width/2-6)+'px';
+      ball.style.top='-16px';
+      ball.className='rhythm-ball'+(stressed?' big':'');
+      ball.style.animation='none';
+      void ball.offsetWidth;
+      ball.style.animation=(stressed?'ballBounceBig':'ballBounce')+' '+(stressed?'0.35s':'0.25s')+' ease';
+      // Highlight current word
+      words.forEach(w=>w.classList.remove('active'));
+      wordEl.classList.add('active');
+    },elapsed);
+    elapsed+=wordTime;
+  });
+  // Clean up
+  setTimeout(()=>{
+    ball.remove();
+    words.forEach(w=>w.classList.remove('active'));
+  },elapsed+500);
+};
 
 window.go=function(dir){
   const card=$('#card');
