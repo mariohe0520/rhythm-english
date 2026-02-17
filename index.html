@@ -23,7 +23,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .card{background:var(--card);border-radius:var(--r);padding:28px 24px;width:100%;max-width:400px;transition:transform .3s,opacity .3s}
 .card.slide-l{transform:translateX(-120%);opacity:0}
 .card.slide-r{transform:translateX(120%);opacity:0}
-.scene{font-size:48px;text-align:center;margin-bottom:16px;line-height:1.3}
+/* Scene card visual */
+.scene-card{background:linear-gradient(135deg,var(--sc1,#6366f1),var(--sc2,#818cf8));border-radius:16px;padding:20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+.scene-card::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);pointer-events:none}
+.scene-icon{font-size:36px;margin-bottom:4px}
+.scene-title{font-size:22px;font-weight:800;color:white;letter-spacing:1px}
+.scene-sub{font-size:13px;color:rgba(255,255,255,.8);margin-top:2px}
 .cat{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
 /* Stress visual */
 .stress-row{display:flex;gap:6px;justify-content:center;align-items:flex-end;margin-bottom:20px;min-height:60px}
@@ -60,6 +65,16 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 .audio-row{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
 .audio-btn{background:var(--pri);border:none;color:white;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .1s}
 .audio-btn:active{transform:scale(.95)}
+/* Chinese mode toggle */
+.mode-toggle{display:flex;align-items:center;gap:8px;justify-content:center;padding:8px 0}
+.mode-toggle label{font-size:12px;color:var(--dim)}
+.toggle{position:relative;width:40px;height:22px;background:#1e1e2e;border-radius:11px;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--pri)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:white;border-radius:50%;transition:left .2s}
+.toggle.on::after{left:20px}
+/* CN helper text */
+.cn-helper{font-size:13px;color:var(--acc);background:#1a1a2e;padding:8px 12px;border-radius:8px;margin-bottom:12px;display:none;text-align:center;border-left:3px solid var(--acc)}
+.cn-helper.show{display:block}
 </style>
 </head>
 <body>
@@ -67,6 +82,10 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
   <div class="hdr">
     <h1>🎵 Rhythm English</h1>
     <div class="badge" id="xp">Day 1</div>
+  </div>
+  <div class="mode-toggle">
+    <label>中文辅助</label>
+    <div class="toggle" id="cnToggle" onclick="toggleCN()"></div>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
   <div class="card-wrap">
@@ -79,13 +98,25 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
   </div>
 </div>
 <script type="module">
-import{DAY1}from'./data/sentences.js';
+import{DAY1,SCENES}from'./data/sentences.js';
 let idx=parseInt(localStorage.getItem('re-idx')||'0');
+let cnMode=localStorage.getItem('re-cn')==='1';
 const $=s=>document.querySelector(s);
+let audio=null;
+
+window.toggleCN=function(){
+  cnMode=!cnMode;
+  localStorage.setItem('re-cn',cnMode?'1':'0');
+  $('#cnToggle').classList.toggle('on',cnMode);
+  render();
+};
 
 function render(){
   const s=DAY1[idx];
   if(!s)return;
+  const sc=SCENES[s.id]||{icon:"💬",colors:["#6366f1","#818cf8"],title:"",sub:""};
+  // init toggle
+  $('#cnToggle').classList.toggle('on',cnMode);
   // progress
   $('#prog').style.width=((idx+1)/DAY1.length*100)+'%';
   $('#count').textContent=`${idx+1} / ${DAY1.length}`;
@@ -95,17 +126,25 @@ function render(){
   const dots=s.words.map((w,i)=>{
     const size=Math.round(16+s.stress[i]*32);
     const op=(.3+s.stress[i]*.7).toFixed(2);
-    return`<div class="stress-word"><div class="stress-dot" style="width:${size}px;height:${size}px;opacity:${op}"></div><span class="stress-label">${w}</span></div>`;
+    return`<div class="stress-word"><div class="stress-dot" style="width:${size}px;height:${size}px;opacity:${op}"></div><span class="stress-label">${s.stress[i]>=.8?w.toUpperCase():w}</span></div>`;
   }).join('');
+  // Chinese helper (shown in CN mode)
+  const cnHelper=cnMode?`<div class="cn-helper show">💡 ${s.cn}</div>`:'';
   // card
   $('#card').innerHTML=`
     <div class="cat">${s.cat} #${s.id}</div>
-    <div class="scene">${s.scene}</div>
+    <div class="scene-card" style="--sc1:${sc.colors[0]};--sc2:${sc.colors[1]}">
+      <div class="scene-icon">${sc.icon}</div>
+      <div class="scene-title">${sc.title}</div>
+      <div class="scene-sub">${sc.sub}</div>
+    </div>
+    ${cnHelper}
     <div class="stress-row">${dots}</div>
     <div class="sentence">${s.text}</div>
     <div class="ipa">${s.ipa}</div>
     <div class="audio-row">
       <button class="audio-btn" onclick="window.speak()">🔊 Listen</button>
+      <button class="audio-btn" style="background:var(--ok)" onclick="window.speakSlow()">🐢 Slow</button>
     </div>
     <div class="section">
       <div class="section-label">Meaning</div>
@@ -127,18 +166,36 @@ function render(){
       <div class="section-label">❌ Non-native trap</div>
       <div class="trap">"${s.trap}"</div>
     </div>
-    <div class="cn-reveal">
+    ${!cnMode?`<div class="cn-reveal">
       <button class="cn-btn" onclick="this.nextElementSibling.classList.toggle('show');this.textContent=this.textContent==='Reveal 中文'?'Hide':'Reveal 中文'">Reveal 中文</button>
       <div class="cn-text">${s.cn}</div>
-    </div>
+    </div>`:''}
   `;
   localStorage.setItem('re-idx',idx);
 }
 
 window.speak=function(){
-  const u=new SpeechSynthesisUtterance(DAY1[idx].text);
-  u.lang='en-US';u.rate=.85;
-  speechSynthesis.speak(u);
+  if(audio){audio.pause();audio=null;}
+  const id=String(DAY1[idx].id).padStart(2,'0');
+  audio=new Audio('audio/'+id+'.mp3');
+  audio.play().catch(()=>{
+    // fallback to speech synthesis
+    const u=new SpeechSynthesisUtterance(DAY1[idx].text);
+    u.lang='en-US';u.rate=.85;
+    speechSynthesis.speak(u);
+  });
+};
+
+window.speakSlow=function(){
+  if(audio){audio.pause();audio=null;}
+  const id=String(DAY1[idx].id).padStart(2,'0');
+  audio=new Audio('audio/'+id+'.mp3');
+  audio.playbackRate=0.7;
+  audio.play().catch(()=>{
+    const u=new SpeechSynthesisUtterance(DAY1[idx].text);
+    u.lang='en-US';u.rate=.55;
+    speechSynthesis.speak(u);
+  });
 };
 
 window.go=function(d){

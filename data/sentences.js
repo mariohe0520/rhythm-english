@@ -1,4 +1,38 @@
 // Day 1: Meetings & Alignment — 30 High-Frequency Native Sentences
+// Scene descriptions for SVG generation (replaces emoji)
+const SCENES = {
+  1: {icon:"🚀", colors:["#6366f1","#818cf8"], title:"KICK OFF", sub:"→ Start a meeting with energy", img:"A confident person standing up at a meeting table, gesturing 'let's go' to seated colleagues"},
+  2: {icon:"📊", colors:["#f59e0b","#fbbf24"], title:"STATUS?", sub:"→ Ask where things are", img:"Person pointing at a progress bar chart, eyebrow raised"},
+  3: {icon:"🧭", colors:["#10b981","#34d399"], title:"WALK THROUGH", sub:"→ Explain step by step", img:"Person guiding others through a flowchart on whiteboard"},
+  4: {icon:"⏰", colors:["#ef4444","#f87171"], title:"TIGHT ON TIME", sub:"→ We need to be quick", img:"Clock showing almost full, person speaking fast"},
+  5: {icon:"🎙️", colors:["#8b5cf6","#a78bfa"], title:"AUDIO CHECK", sub:"→ Can you hear me?", img:"Person on video call, waving, mic icon"},
+  6: {icon:"📋", colors:["#06b6d4","#22d3ee"], title:"AGENDA", sub:"→ Here's what we cover", img:"Checklist with 3 items, finger pointing at first"},
+  7: {icon:"🚧", colors:["#f97316","#fb923c"], title:"ANY BLOCKERS?", sub:"→ Is anyone stuck?", img:"Road barrier with question mark"},
+  8: {icon:"📄", colors:["#6366f1","#818cf8"], title:"SAME PAGE", sub:"→ Make sure we all agree", img:"Three people looking at same document, nodding"},
+  9: {icon:"⏮️", colors:["#10b981","#34d399"], title:"PICK UP", sub:"→ Continue from last time", img:"Bookmark in a book, finger opening to that page"},
+  10:{icon:"🙏", colors:["#f59e0b","#fbbf24"], title:"THANKS!", sub:"→ Appreciate quick response", img:"Person jumping onto a video call with a thumbs up"},
+  11:{icon:"🔍", colors:["#8b5cf6","#a78bfa"], title:"UNPACK", sub:"→ Tell me more details", img:"Gift box being opened, contents spreading out"},
+  12:{icon:"⚡", colors:["#ef4444","#f87171"], title:"PUSH BACK", sub:"→ I disagree (politely)", img:"Person putting hand up in 'stop' gesture, but smiling"},
+  13:{icon:"✅", colors:["#10b981","#34d399"], title:"TRACKS", sub:"→ That makes sense", img:"Train on tracks, smooth straight line"},
+  14:{icon:"📍", colors:["#06b6d4","#22d3ee"], title:"STATUS", sub:"→ Here's the update", img:"Pin on a map showing current location"},
+  15:{icon:"🚩", colors:["#f97316","#fb923c"], title:"FLAG", sub:"→ Raise a concern", img:"Red flag being planted on top of an issue"},
+  16:{icon:"⚖️", colors:["#6366f1","#818cf8"], title:"TRADE-OFF", sub:"→ What do we give up?", img:"Balance scale with two options"},
+  17:{icon:"🐇", colors:["#8b5cf6","#a78bfa"], title:"RABBIT HOLE", sub:"→ Stop going off topic", img:"Rabbit running into a deep hole, person pulling back"},
+  18:{icon:"📈", colors:["#10b981","#34d399"], title:"MOVE NEEDLE", sub:"→ Make real progress", img:"Speedometer needle moving from low to high"},
+  19:{icon:"🧩", colors:["#f59e0b","#fbbf24"], title:"BIG PICTURE", sub:"→ How does this connect?", img:"Puzzle piece being placed into larger picture"},
+  20:{icon:"🔗", colors:["#06b6d4","#22d3ee"], title:"LOOP IN", sub:"→ Bring someone into this", img:"Lasso pulling a person into a circle of people"},
+  21:{icon:"📝", colors:["#6366f1","#818cf8"], title:"RECAP", sub:"→ Summarize what we do", img:"Notepad with checkboxes, pen checking items"},
+  22:{icon:"👤", colors:["#ef4444","#f87171"], title:"WHO OWNS?", sub:"→ Who is responsible?", img:"Finger pointing at one person in a group"},
+  23:{icon:"📅", colors:["#f59e0b","#fbbf24"], title:"WHEN?", sub:"→ Give me a timeline", img:"Calendar with a circled date and arrow"},
+  24:{icon:"💬", colors:["#8b5cf6","#a78bfa"], title:"OFFLINE", sub:"→ Discuss privately later", img:"Two people stepping out of a group into a side room"},
+  25:{icon:"🚪", colors:["#f97316","#fb923c"], title:"HARD STOP", sub:"→ I must leave at this time", img:"Person at door, looking at watch, hand on handle"},
+  26:{icon:"📧", colors:["#06b6d4","#22d3ee"], title:"FOLLOW UP", sub:"→ I'll send a summary", img:"Email flying from laptop to multiple people"},
+  27:{icon:"🔄", colors:["#10b981","#34d399"], title:"CIRCLE BACK", sub:"→ Let's revisit next week", img:"Circular arrow going around a calendar"},
+  28:{icon:"✋", colors:["#6366f1","#818cf8"], title:"BEFORE WRAP", sub:"→ Anything else?", img:"Hand raised, door half open"},
+  29:{icon:"🎉", colors:["#f59e0b","#fbbf24"], title:"MAKE IT HAPPEN", sub:"→ Let's go execute!", img:"Team high-fiving, sparks flying"},
+  30:{icon:"🎁", colors:["#10b981","#34d399"], title:"TIME BACK", sub:"→ Ending early = gift", img:"Clock with gift ribbon, people smiling"}
+};
+export{SCENES};
 export const DAY1 = [
   // === OPENING (1-10) ===
   {
