@@ -99,6 +99,37 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
 /* Completion summary */
 .complete-summary{text-align:center;padding:8px 0;font-size:12px;color:var(--dim)}
 .complete-summary b{color:var(--ok)}
+/* Quiz mode */
+.quiz-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:100;display:none;flex-direction:column;padding:env(safe-area-inset-top) 20px 20px;overflow-y:auto}
+.quiz-overlay.active{display:flex}
+.quiz-progress{display:flex;gap:3px;margin-bottom:20px}
+.quiz-pip{flex:1;height:4px;border-radius:2px;background:#1e1e2e}
+.quiz-pip.done{background:var(--ok)}
+.quiz-pip.wrong{background:var(--red)}
+.quiz-pip.current{background:var(--acc)}
+.quiz-q{font-size:18px;font-weight:700;text-align:center;margin:20px 0 12px;line-height:1.4}
+.quiz-hint{font-size:13px;color:var(--dim);text-align:center;margin-bottom:20px}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.quiz-opt{padding:16px;border-radius:12px;background:var(--card);border:2px solid transparent;font-size:15px;color:var(--txt);cursor:pointer;text-align:left;transition:all .15s;line-height:1.4}
+.quiz-opt:active{transform:scale(.97)}
+.quiz-opt.selected{border-color:var(--acc);background:rgba(99,102,241,.1)}
+.quiz-opt.correct{border-color:var(--ok);background:rgba(16,185,129,.1)}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.1)}
+.quiz-feedback{text-align:center;padding:16px;border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:600}
+.quiz-feedback.right{background:rgba(16,185,129,.1);color:var(--ok)}
+.quiz-feedback.wrong{background:rgba(239,68,68,.1);color:var(--red)}
+.quiz-next-btn{width:100%;padding:16px;border-radius:12px;border:none;font-size:16px;font-weight:700;cursor:pointer;background:var(--pri);color:white;margin-top:auto}
+.quiz-next-btn:active{transform:scale(.97)}
+.quiz-score{text-align:center;margin:40px 0}
+.quiz-score-num{font-size:64px;font-weight:900;color:var(--ok)}
+.quiz-score-label{font-size:16px;color:var(--dim);margin-top:4px}
+.quiz-xp{font-size:24px;font-weight:800;color:var(--acc);margin-top:12px}
+/* Quiz trigger button */
+.quiz-trigger{width:100%;padding:14px;border-radius:12px;border:2px dashed var(--acc);background:transparent;color:var(--acc);font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;transition:all .2s}
+.quiz-trigger:active{background:rgba(99,102,241,.1);transform:scale(.97)}
+/* XP display */
+.xp-display{display:flex;align-items:center;gap:4px}
+.xp-num{font-size:13px;font-weight:800;color:var(--acc)}
 </style>
 </head>
 <body>
@@ -110,7 +141,8 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
         <label>中文</label>
         <div class="toggle" id="cnToggle" onclick="toggleCN()"></div>
       </div>
-      <div class="badge" id="xp">Day 1</div>
+      <div class="xp-display">⚡<span class="xp-num" id="xpNum">0</span></div>
+      <div class="badge" id="dayBadge">Day 1</div>
     </div>
   </div>
   <div class="streak-bar" id="streakBar"></div>
@@ -118,6 +150,12 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-s
   <div class="complete-summary" id="completeSummary"></div>
   <div class="card" id="card"></div>
 </div>
+<!-- Quiz overlay -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-progress" id="quizProgress"></div>
+  <div id="quizContent"></div>
+</div>
+
 <div class="nav">
   <button class="nav-btn" id="prev" onclick="go(-1)">←</button>
   <span class="nav-count" id="count"></span>
@@ -249,6 +287,7 @@ function render(){
     <button class="learn-btn ${getProgress().learned.includes(s.id)?'learned':'unlearned'}" onclick="window.toggleLearned()">
       ${getProgress().learned.includes(s.id)?'✅ Learned!':'Mark as Learned'}
     </button>
+    ${getProgress().learned.length>=5?'<button class="quiz-trigger" onclick="Quiz.start()">🧠 Quiz Me! ('+getProgress().learned.length+' sentences)</button>':''}
   `;
   renderStreak();
   // Scroll to top on card change
@@ -302,6 +341,146 @@ document.addEventListener('keydown',e=>{
   if(e.key===' '){e.preventDefault();window.speak();}
 });
 
+// ===== XP SYSTEM =====
+function getXP(){return parseInt(localStorage.getItem('re-xp')||'0');}
+function addXP(n){const x=getXP()+n;localStorage.setItem('re-xp',String(x));$('#xpNum').textContent=x;return x;}
+function updateXP(){$('#xpNum').textContent=getXP();}
+
+// ===== QUIZ ENGINE =====
+const Quiz={
+  questions:[],
+  current:0,
+  score:0,
+  answered:false,
+  results:[],
+
+  // Generate quiz from learned sentences
+  generate(){
+    const p=getProgress();
+    const pool=p.learned.length>=5?DAY1.filter(s=>p.learned.includes(s.id)):DAY1.slice(0,10);
+    if(pool.length<4)return false;
+    this.questions=[];this.current=0;this.score=0;this.results=[];
+    // Shuffle and pick 10 (or fewer)
+    const shuffled=[...pool].sort(()=>Math.random()-.5).slice(0,10);
+    for(const s of shuffled){
+      const qType=Math.random();
+      if(qType<0.33){
+        // Type 1: What does this mean?
+        const wrong=pool.filter(x=>x.id!==s.id).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.cn);
+        const opts=[s.cn,...wrong].sort(()=>Math.random()-.5);
+        this.questions.push({type:'meaning',prompt:s.text,hint:'What does this mean?',options:opts,answer:s.cn,sentenceId:s.id});
+      }else if(qType<0.66){
+        // Type 2: Which sentence fits this scene?
+        const wrong=pool.filter(x=>x.id!==s.id).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.text);
+        const opts=[s.text,...wrong].sort(()=>Math.random()-.5);
+        this.questions.push({type:'scene',prompt:s.cn,hint:'Which English sentence?',options:opts,answer:s.text,sentenceId:s.id});
+      }else{
+        // Type 3: Fill the stress — which word is stressed?
+        const stressedWords=s.words.filter((_,i)=>s.stress[i]>=0.8);
+        if(stressedWords.length===0)continue;
+        const target=stressedWords[Math.floor(Math.random()*stressedWords.length)];
+        const wrong=s.words.filter(w=>w!==target&&s.stress[s.words.indexOf(w)]<0.5).slice(0,3);
+        if(wrong.length<2)continue;
+        const opts=[target,...wrong.slice(0,3)].sort(()=>Math.random()-.5);
+        this.questions.push({type:'stress',prompt:s.text,hint:'Which word gets the STRONGEST stress?',options:opts,answer:target,sentenceId:s.id});
+      }
+    }
+    return this.questions.length>=3;
+  },
+
+  start(){
+    if(!this.generate()){alert('Learn at least 5 sentences first!');return;}
+    $('#quizOverlay').classList.add('active');
+    this.renderQuestion();
+  },
+
+  renderQuestion(){
+    const q=this.questions[this.current];
+    this.answered=false;
+    // Progress pips
+    $('#quizProgress').innerHTML=this.questions.map((_,i)=>{
+      let cls='quiz-pip';
+      if(i<this.current)cls+=this.results[i]?' done':' wrong';
+      else if(i===this.current)cls+=' current';
+      return`<div class="${cls}"></div>`;
+    }).join('');
+    // Question content
+    $('#quizContent').innerHTML=`
+      <div class="quiz-q">${q.prompt}</div>
+      <div class="quiz-hint">${q.hint}</div>
+      <div class="quiz-opts">${q.options.map((o,i)=>
+        `<div class="quiz-opt" data-idx="${i}" onclick="Quiz.pick(${i})">${o}</div>`
+      ).join('')}</div>
+      <div id="quizFeedback"></div>
+      <button class="quiz-next-btn" id="quizNextBtn" style="display:none" onclick="Quiz.next()">Continue</button>
+    `;
+  },
+
+  pick(i){
+    if(this.answered)return;
+    this.answered=true;
+    const q=this.questions[this.current];
+    const picked=q.options[i];
+    const correct=picked===q.answer;
+    this.results.push(correct);
+    if(correct)this.score++;
+    // Highlight
+    document.querySelectorAll('.quiz-opt').forEach((el,j)=>{
+      if(q.options[j]===q.answer)el.classList.add('correct');
+      else if(j===i&&!correct)el.classList.add('wrong');
+    });
+    const fb=$('#quizFeedback');
+    fb.className='quiz-feedback '+(correct?'right':'wrong');
+    fb.textContent=correct?['🎉 Perfect!','✅ Nailed it!','💪 You got it!'][Math.floor(Math.random()*3)]:
+      `❌ It's: ${q.answer}`;
+    $('#quizNextBtn').style.display='block';
+  },
+
+  next(){
+    this.current++;
+    if(this.current>=this.questions.length){this.showResults();return;}
+    this.renderQuestion();
+  },
+
+  showResults(){
+    const pct=Math.round(this.score/this.questions.length*100);
+    const xpEarned=this.score*10;
+    addXP(xpEarned);
+    // Update streak
+    const p=getProgress();
+    const today=todayStr();
+    if(p.lastDate!==today){
+      if(p.lastDate){const d=new Date(p.lastDate);d.setDate(d.getDate()+1);p.streak=d.toISOString().slice(0,10)===today?p.streak+1:1;}
+      else p.streak=1;
+      p.lastDate=today;
+      if(!p.history.includes(today))p.history.push(today);
+      saveProgress(p);
+    }
+    $('#quizContent').innerHTML=`
+      <div class="quiz-score">
+        <div class="quiz-score-num">${pct}%</div>
+        <div class="quiz-score-label">${this.score}/${this.questions.length} correct</div>
+        <div class="quiz-xp">+${xpEarned} XP ⚡</div>
+      </div>
+      <button class="quiz-next-btn" onclick="Quiz.close()" style="margin-top:20px">Done</button>
+    `;
+    // Update progress pips
+    $('#quizProgress').innerHTML=this.questions.map((_,i)=>{
+      return`<div class="quiz-pip${this.results[i]?' done':' wrong'}"></div>`;
+    }).join('');
+  },
+
+  close(){
+    $('#quizOverlay').classList.remove('active');
+    render();
+  }
+};
+window.Quiz=Quiz;
+
+// Add quiz trigger after learned button in render
+const _origRender=render;
+
+updateXP();
 render();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 </script>
