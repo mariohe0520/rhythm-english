@@ -556,7 +556,41 @@ body>*{position:relative;z-index:1}
   <button class="nav-btn" id="prev" onclick="go(-1)" aria-label="Previous sentence">←</button>
   <span class="nav-count" id="count" aria-live="polite"></span>
   <button class="nav-btn" id="next" onclick="go(1)" aria-label="Next sentence">→</button>
+  <button class="nav-btn" id="custom" onclick="CustomPractice.show()" aria-label="Custom practice" style="margin-left:8px;background:var(--ok)">✏️</button>
 </div>
+
+<!-- Custom Practice Modal -->
+<div id="customModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center">
+  <div style="background:var(--card);padding:24px;border-radius:16px;width:90%;max-width:400px">
+    <h3 style="margin-bottom:16px">✏️ Custom Practice</h3>
+    <p style="color:var(--dim);font-size:13px;margin-bottom:12px">Type any sentence to practice pronunciation</p>
+    <textarea id="customInput" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--dim);border-radius:8px;color:var(--txt);padding:12px;font-size:16px" placeholder="e.g., I need to finish the report by Friday"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="CustomPractice.play(0.8)" style="flex:1;background:var(--pri);color:white;border:none;padding:12px;border-radius:8px;font-weight:600">🐢 Slow</button>
+      <button onclick="CustomPractice.play(1)" style="flex:1;background:var(--ok);color:white;border:none;padding:12px;border-radius:8px;font-weight:600">▶️ Normal</button>
+    </div>
+    <div style="margin-top:16px">
+      <button onclick="document.getElementById('customModal').style.display='none'" style="width:100%;background:transparent;border:1px solid var(--dim);color:var(--dim);padding:10px;border-radius:8px">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CustomPractice={
+  show(){document.getElementById('customModal').style.display='flex';document.getElementById('customInput').focus()},
+  play(rate){
+    const text=document.getElementById('customInput').value.trim();
+    if(!text){alert('Please enter some text');return;}
+    if(typeof speechSynthesis!=='undefined'){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);
+      u.lang='en-US';u.rate=rate*0.85;
+      speechSynthesis.speak(u);
+    }
+  }
+};
+window.CustomPractice=CustomPractice;
+</script>
 <script type="module">
 import{DAY1,SCENES}from'./data/sentences.js';
 import{DAY2,SCENES_DAY2}from'./data/day2.js';
