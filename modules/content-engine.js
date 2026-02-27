@@ -87,6 +87,16 @@ export class PatternLibrary {
   get count() {
     return this.patterns.length;
   }
+
+  /** Get all unique life categories. */
+  get lifeCategories() {
+    return [...new Set(this.patterns.map((p) => p.lifeCategory).filter(Boolean))];
+  }
+
+  /** Get patterns by life category. */
+  byLifeCategory(cat) {
+    return this.patterns.filter((p) => p.lifeCategory === cat);
+  }
 }
 
 const PATTERN_DATA = [
@@ -97,7 +107,10 @@ const PATTERN_DATA = [
     examples: ["I KNOW", "be LIEVE", "a GREE", "to DAY", "a LIVE", "re TURN"],
     ipa: "/aɪ noʊ/", commonInChinese: false,
     chineseNote: "Chinese tends toward equal syllable weight; the unstressed 'da' often gets too much emphasis",
-    difficulty: 1, category: "foot"
+    difficulty: 1, category: "foot",
+    sceneEmoji: "👋💡", scene: "social-greeting", lifeCategory: "social",
+    context_zh: "和朋友打招呼时，肯定地说：",
+    translation_zh: "我知道"
   },
   {
     id: "trochee", name: "Trochee", notation: "DUM-da",
@@ -105,7 +118,10 @@ const PATTERN_DATA = [
     examples: ["LET me", "NEV-er", "AL-ways", "HAP-py", "MO-ney", "EAS-y"],
     ipa: "/ˈlɛt mi/", commonInChinese: true,
     chineseNote: "Similar to Chinese two-character compounds with falling tone first",
-    difficulty: 1, category: "foot"
+    difficulty: 1, category: "foot",
+    sceneEmoji: "🏠😊", scene: "home-daily", lifeCategory: "home",
+    context_zh: "在家里，轻松地跟家人说：",
+    translation_zh: "让我来"
   },
   {
     id: "spondee", name: "Spondee", notation: "DUM-DUM",
@@ -113,7 +129,10 @@ const PATTERN_DATA = [
     examples: ["HARD STOP", "PUSH BACK", "THAT TRACKS", "BREAK DOWN", "SIGN OFF", "HEADS UP"],
     ipa: "/hɑːrd stɒp/", commonInChinese: true,
     chineseNote: "Common in phrasal verbs; Chinese speakers handle equal stress well",
-    difficulty: 1, category: "foot"
+    difficulty: 1, category: "foot",
+    sceneEmoji: "🏢⏹️", scene: "office-meeting", lifeCategory: "work",
+    context_zh: "会议中，需要果断地说：",
+    translation_zh: "到此为止 / 回绝"
   },
   {
     id: "pyrrhic", name: "Pyrrhic", notation: "da-da",
@@ -121,7 +140,10 @@ const PATTERN_DATA = [
     examples: ["of the", "in a", "to the", "for a", "on the", "at a"],
     ipa: "/əv ðə/", commonInChinese: false,
     chineseNote: "Chinese speakers tend to stress these function words too heavily",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "📖🗣️", scene: "reading-aloud", lifeCategory: "home",
+    context_zh: "朗读文章时，轻轻带过的虚词：",
+    translation_zh: "的、在一个"
   },
   // ── Foot-level (3-syllable) ──────────────────────────────────────────
   {
@@ -130,7 +152,10 @@ const PATTERN_DATA = [
     examples: ["un-der-STAND", "in-ter-RUPT", "ov-er-LOOK", "re-ar-RANGE", "dis-a-GREE", "rec-om-MEND"],
     ipa: "/ˌʌndərˈstænd/", commonInChinese: false,
     chineseNote: "The two weak syllables before stress are often given equal weight by Chinese speakers",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "🏢📈", scene: "office-discussion", lifeCategory: "work",
+    context_zh: "在公司讨论时，表达理解：",
+    translation_zh: "理解 / 打断 / 忽视"
   },
   {
     id: "dactyl", name: "Dactyl", notation: "DUM-da-da",
@@ -138,7 +163,10 @@ const PATTERN_DATA = [
     examples: ["BEAU-ti-ful", "EV-ery-one", "YES-ter-day", "TECH-ni-cal", "COM-for-ta-ble", "GEN-er-ous"],
     ipa: "/ˈbjuːtɪfəl/", commonInChinese: false,
     chineseNote: "Chinese speakers often stress the second or third syllable instead of the first",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "🌅🌸", scene: "admiring-scenery", lifeCategory: "entertainment",
+    context_zh: "看到美丽的风景，感叹地说：",
+    translation_zh: "美丽的 / 每个人 / 昨天"
   },
   {
     id: "amphibrach", name: "Amphibrach", notation: "da-DUM-da",
@@ -146,7 +174,10 @@ const PATTERN_DATA = [
     examples: ["a-GREE-ment", "to-GE-ther", "de-CI-sion", "im-POR-tant", "a-MEND-ment", "con-DI-tion"],
     ipa: "/əˈɡriːmənt/", commonInChinese: false,
     chineseNote: "Tendency to flatten all three syllables to equal stress",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "🤝📋", scene: "business-agreement", lifeCategory: "work",
+    context_zh: "签合同时，讨论条件：",
+    translation_zh: "协议 / 一起 / 决定"
   },
   {
     id: "antibacchius", name: "Antibacchius", notation: "DUM-DUM-da",
@@ -154,7 +185,10 @@ const PATTERN_DATA = [
     examples: ["GREAT STUFF-y", "HARD WORK-ing", "TEAM BUILD-ing", "BRAIN STORM-ing", "SHORT LIST-ed", "PRICE MATCH-ing"],
     ipa: "/ɡreɪt ˈstʌfi/", commonInChinese: true,
     chineseNote: "Similar to some Chinese compound + suffix patterns",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "💪👷", scene: "team-building", lifeCategory: "work",
+    context_zh: "夸奖团队努力工作时：",
+    translation_zh: "努力工作的 / 团队建设"
   },
   {
     id: "bacchius", name: "Bacchius", notation: "da-DUM-DUM",
@@ -162,7 +196,10 @@ const PATTERN_DATA = [
     examples: ["a-LOUD VOICE", "the MAIN POINT", "re-FRESH START", "a-BROAD VIEW", "a-CROSS TOWN", "a-ROUND NOON"],
     ipa: "/ə ˈlaʊd vɔɪs/", commonInChinese: false,
     chineseNote: "The initial weak syllable is often over-pronounced",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "🔊📢", scene: "speaking-up", lifeCategory: "social",
+    context_zh: "需要大声说话引起注意时：",
+    translation_zh: "大声地 / 重点是"
   },
   // ── Foot-level (4-syllable) ──────────────────────────────────────────
   {
@@ -171,7 +208,10 @@ const PATTERN_DATA = [
     examples: ["OR-din-ar-y", "SEC-re-tar-y", "NEC-es-sar-y", "TEMP-o-rar-y", "MIL-i-tar-y", "VOL-un-tar-y"],
     ipa: "/ˈɔːrdɪnˌɛri/", commonInChinese: false,
     chineseNote: "4-syllable words with front stress are particularly hard; Chinese speakers add stress to later syllables",
-    difficulty: 3, category: "foot"
+    difficulty: 3, category: "foot",
+    sceneEmoji: "📝✍️", scene: "formal-writing", lifeCategory: "work",
+    context_zh: "写正式报告或邮件时常用的词：",
+    translation_zh: "普通的 / 秘书 / 必要的"
   },
   {
     id: "quaternary-2", name: "Second Stress 4", notation: "da-DUM-da-da",
@@ -179,7 +219,10 @@ const PATTERN_DATA = [
     examples: ["com-MU-ni-cate", "a-PPR-ci-ate", "ne-GO-ti-ate", "par-TI-ci-pate", "in-VES-ti-gate", "col-LAB-o-rate"],
     ipa: "/kəˈmjuːnɪkeɪt/", commonInChinese: false,
     chineseNote: "Common business verbs; stress placement is critical for comprehension",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "🏢💬", scene: "business-verbs", lifeCategory: "work",
+    context_zh: "商务会议中常用的动词：",
+    translation_zh: "沟通 / 欣赏 / 谈判"
   },
   {
     id: "quaternary-3", name: "Third Stress 4", notation: "da-da-DUM-da",
@@ -187,7 +230,10 @@ const PATTERN_DATA = [
     examples: ["un-der-STAND-ing", "in-for-MA-tion", "com-mu-NI-cate", "ap-pre-CI-ate", "rec-om-MEN-ded", "op-por-TU-ni-ty"],
     ipa: "/ˌʌndərˈstændɪŋ/", commonInChinese: false,
     chineseNote: "The shift from verb to noun stress (comMUnicate vs commuNIcation) confuses Chinese speakers",
-    difficulty: 2, category: "foot"
+    difficulty: 2, category: "foot",
+    sceneEmoji: "📊💡", scene: "business-nouns", lifeCategory: "work",
+    context_zh: "工作汇报中常用的名词：",
+    translation_zh: "理解 / 信息 / 机会"
   },
   // ── Phrase-level patterns ────────────────────────────────────────────
   {
@@ -196,7 +242,10 @@ const PATTERN_DATA = [
     examples: ["Let's GO", "Let's START", "Let's MOVE", "Let's CHAT", "Let's DIVE", "Let's SHIP"],
     ipa: "/lɛts ɡoʊ/", commonInChinese: true,
     chineseNote: "Natural for Chinese speakers who know to stress the verb",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "🏢👥💪🚀", scene: "meeting-start", lifeCategory: "work",
+    context_zh: "开会时，主持人精神饱满地说：",
+    translation_zh: "我们走吧 / 开始吧"
   },
   {
     id: "phrase-verb-it-particle", name: "Verb-It-Particle", notation: "DUM-da-DUM",
@@ -204,7 +253,10 @@ const PATTERN_DATA = [
     examples: ["PICK it UP", "BREAK it DOWN", "WRAP it UP", "SORT it OUT", "FIGURE it OUT", "CHECK it OUT"],
     ipa: "/pɪk ɪt ʌp/", commonInChinese: false,
     chineseNote: "'it' nearly vanishes in speech; Chinese speakers give it full weight",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "🧩🔧", scene: "problem-solving", lifeCategory: "work",
+    context_zh: "工作中拆解问题时说：",
+    translation_zh: "捡起来 / 拆解它 / 搞定它"
   },
   {
     id: "phrase-wh-question", name: "Wh-Question Fall", notation: "DUM-da-da-DUM",
@@ -212,7 +264,10 @@ const PATTERN_DATA = [
     examples: ["WHERE are we NOW", "WHAT do you THINK", "HOW does this WORK", "WHEN can we MEET", "WHO owns this TASK", "WHY did it FAIL"],
     ipa: "/wɛr ɑːr wi naʊ/", commonInChinese: false,
     chineseNote: "Chinese speakers often stress 'are/do/does' too much in questions",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "🤔❓", scene: "asking-questions", lifeCategory: "social",
+    context_zh: "好奇地问别人情况时：",
+    translation_zh: "我们现在在哪？/ 你怎么想？"
   },
   {
     id: "phrase-i-want-to", name: "I Want To + Verb", notation: "da-da-da-DUM",
@@ -220,7 +275,10 @@ const PATTERN_DATA = [
     examples: ["I want to FLAG", "I want to HELP", "I want to ADD", "I want to SHARE", "I want to CHECK", "I want to ASK"],
     ipa: "/aɪ wɒnt tə flæɡ/", commonInChinese: false,
     chineseNote: "'want to' reduces to 'wanna'; Chinese speakers articulate each word fully",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "🙋‍♂️📌", scene: "raising-concern", lifeCategory: "work",
+    context_zh: "会议中想提出一个问题：",
+    translation_zh: "我想要标记 / 我想帮忙"
   },
   {
     id: "phrase-make-sure", name: "Make Sure + Clause", notation: "DUM-DUM-da-da-DUM",
@@ -232,7 +290,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/meɪk ʃʊr wɪr ɒn træk/", commonInChinese: false,
     chineseNote: "The unstressed words between MAKE SURE and the final stress must be reduced",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "✅🔍", scene: "confirming", lifeCategory: "work",
+    context_zh: "确认进度时，认真地说：",
+    translation_zh: "确保我们进度正常"
   },
   {
     id: "phrase-thanks-for", name: "Thanks For + Gerund", notation: "DUM-da-DUM-da",
@@ -243,7 +304,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/θæŋks fɔːr ˈdʒʌmpɪŋ/", commonInChinese: true,
     chineseNote: "Relatively natural; watch that 'for' stays weak",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "🙏😊", scene: "thanking", lifeCategory: "social",
+    context_zh: "感谢别人的帮助时：",
+    translation_zh: "谢谢你的帮助 / 分享"
   },
   {
     id: "phrase-can-you", name: "Can You + Verb", notation: "da-da-DUM",
@@ -251,7 +315,10 @@ const PATTERN_DATA = [
     examples: ["Can you HELP", "Can you CHECK", "Can you SEND", "Can you SHARE", "Can you JOIN", "Can you WAIT"],
     ipa: "/kən jə hɛlp/", commonInChinese: false,
     chineseNote: "'can' reduces to /kən/ and 'you' to /jə/; Chinese speakers say full /kæn juː/",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "👋🙏", scene: "polite-request", lifeCategory: "social",
+    context_zh: "礼貌地请别人帮忙：",
+    translation_zh: "你能帮忙吗？/ 你能查一下吗？"
   },
   {
     id: "phrase-going-to", name: "Going To (Gonna)", notation: "DUM-da-DUM",
@@ -259,7 +326,10 @@ const PATTERN_DATA = [
     examples: ["GOING to LEAVE", "GOING to SEND", "GOING to NEED", "GOING to PUSH", "GOING to CALL", "GOING to SHIP"],
     ipa: "/ˈɡɒnə liːv/", commonInChinese: false,
     chineseNote: "'going to' becomes 'gonna' /ˈɡɒnə/; saying all three words sounds overly formal",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "📅🔜", scene: "making-plans", lifeCategory: "home",
+    context_zh: "告诉别人接下来的计划：",
+    translation_zh: "我要走了 / 我要发了"
   },
   {
     id: "phrase-have-to", name: "Have To (Hafta)", notation: "DUM-da-DUM",
@@ -267,7 +337,10 @@ const PATTERN_DATA = [
     examples: ["HAVE to GO", "HAVE to CHECK", "HAVE to STOP", "HAVE to ASK", "HAVE to KNOW", "HAVE to TRY"],
     ipa: "/ˈhæftə ɡoʊ/", commonInChinese: false,
     chineseNote: "'have to' becomes 'hafta' /ˈhæftə/; full pronunciation sounds stilted",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "⏰🏃", scene: "urgency", lifeCategory: "home",
+    context_zh: "时间紧迫，必须做某事：",
+    translation_zh: "必须走了 / 必须检查"
   },
   // ── Compound patterns ────────────────────────────────────────────────
   {
@@ -276,7 +349,10 @@ const PATTERN_DATA = [
     examples: ["TEAM-work", "DEAD-line", "FEED-back", "ROAD-map", "BRAIN-storm", "MILE-stone"],
     ipa: "/ˈtiːmwɜːrk/", commonInChinese: true,
     chineseNote: "Similar to Chinese noun compounds; first element takes primary stress",
-    difficulty: 1, category: "compound"
+    difficulty: 1, category: "compound",
+    sceneEmoji: "🏢📊", scene: "workplace-terms", lifeCategory: "work",
+    context_zh: "工作中常用的复合名词：",
+    translation_zh: "团队合作 / 截止日期 / 反馈"
   },
   {
     id: "compound-adj-noun", name: "Adj + Noun (Descriptive)", notation: "da-DUM",
@@ -284,7 +360,10 @@ const PATTERN_DATA = [
     examples: ["big DEAL", "hard STOP", "quick WIN", "tight SPOT", "key POINT", "main GOAL"],
     ipa: "/bɪɡ diːl/", commonInChinese: false,
     chineseNote: "Differs from compound nouns; 'big DEAL' (adj+noun) vs 'BIGwig' (compound)",
-    difficulty: 2, category: "compound"
+    difficulty: 2, category: "compound",
+    sceneEmoji: "🎯💥", scene: "emphasis-phrase", lifeCategory: "work",
+    context_zh: "强调某事重要性时：",
+    translation_zh: "大事 / 关键点 / 速赢"
   },
   {
     id: "compound-phrasal-verb", name: "Phrasal Verb", notation: "DUM-da-DUM",
@@ -292,7 +371,10 @@ const PATTERN_DATA = [
     examples: ["PICK it UP", "BRING it UP", "WRAP it UP", "SET it UP", "BREAK it DOWN", "CALL it OFF"],
     ipa: "/pɪk ɪt ʌp/", commonInChinese: false,
     chineseNote: "The particle carries equal stress to the verb; pronoun is nearly silent",
-    difficulty: 2, category: "compound"
+    difficulty: 2, category: "compound",
+    sceneEmoji: "🔄🗣️", scene: "daily-actions", lifeCategory: "home",
+    context_zh: "日常对话中的动词短语：",
+    translation_zh: "收拾好 / 提出来 / 取消"
   },
   {
     id: "compound-three-word", name: "Three-Word Compound", notation: "DUM-da-da",
@@ -300,7 +382,10 @@ const PATTERN_DATA = [
     examples: ["FOLLOW-up e-mail", "BREAK-through mo-ment", "CHECK-in pro-cess", "TRADE-off a-nal-y-sis", "SIGN-off meet-ing", "KICK-off call"],
     ipa: "/ˈfɒloʊˌʌp ˈiːmeɪl/", commonInChinese: false,
     chineseNote: "Primary stress on the first element only; rest decreases",
-    difficulty: 2, category: "compound"
+    difficulty: 2, category: "compound",
+    sceneEmoji: "📧📎", scene: "office-emails", lifeCategory: "work",
+    context_zh: "写邮件时常用的复合词：",
+    translation_zh: "跟进邮件 / 签到流程"
   },
   // ── Clause-level patterns ────────────────────────────────────────────
   {
@@ -313,7 +398,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ɡreɪt stʌf fɔːr ðə tiːm/", commonInChinese: false,
     chineseNote: "The unstressed tail must be spoken quickly, almost mumbled",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "🎉👏", scene: "praising", lifeCategory: "work",
+    context_zh: "表扬同事的工作成果：",
+    translation_zh: "团队做得很棒 / 对我们来说是大赢"
   },
   {
     id: "clause-back-heavy", name: "Back-Loaded Clause", notation: "da-da-da-DUM-DUM",
@@ -325,7 +413,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/lɛt mi dʒʌst meɪk ʃʊr/", commonInChinese: false,
     chineseNote: "The run-up of unstressed syllables is rushed; Chinese speakers space them evenly",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "🤫🛑", scene: "being-cautious", lifeCategory: "work",
+    context_zh: "谨慎地提出建议时：",
+    translation_zh: "让我确认一下 / 我觉得我们应该等等"
   },
   {
     id: "clause-valley", name: "Valley Pattern", notation: "DUM-da-da-da-DUM",
@@ -337,7 +428,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/wɛr ɑːr wi ɒn ðɪs/", commonInChinese: false,
     chineseNote: "The 'valley' of unstressed syllables must be truly reduced, not given equal weight",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "🔎📍", scene: "status-check", lifeCategory: "work",
+    context_zh: "追问进度或状态时：",
+    translation_zh: "我们在这方面怎么样了？"
   },
   {
     id: "clause-mountain", name: "Mountain Pattern", notation: "da-da-DUM-da-da",
@@ -349,7 +443,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/aɪ kən siː wɒt juː/", commonInChinese: false,
     chineseNote: "Single peak in the middle; Chinese speakers distribute stress more evenly",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "💭🤔", scene: "thinking-aloud", lifeCategory: "social",
+    context_zh: "思考后缓缓说出想法：",
+    translation_zh: "我能看出你的意思 / 我们应该谈谈"
   },
   {
     id: "clause-cascade", name: "Cascade (Staircase Down)", notation: "DUM-Dum-dum-da",
@@ -361,7 +458,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ɡreɪt wɜːrk ˈɛvriwʌn/", commonInChinese: false,
     chineseNote: "Progressive de-stressing is unnatural for Chinese speakers who prefer discrete levels",
-    difficulty: 3, category: "clause"
+    difficulty: 3, category: "clause",
+    sceneEmoji: "🎤👏", scene: "public-thanks", lifeCategory: "work",
+    context_zh: "公开感谢大家的努力：",
+    translation_zh: "大家做得好 / 谢谢大家让我..."
   },
   // ── Extended phrase patterns ─────────────────────────────────────────
   {
@@ -376,7 +476,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/aɪ wʊd laɪk tə dɪˈskʌs ə plæn/", commonInChinese: false,
     chineseNote: "Regular beats create a musical quality; Chinese speakers make it too monotone",
-    difficulty: 3, category: "clause"
+    difficulty: 3, category: "clause",
+    sceneEmoji: "💬🎵", scene: "conversation-flow", lifeCategory: "social",
+    context_zh: "日常对话中自然的长句：",
+    translation_zh: "我想讨论一个计划"
   },
   {
     id: "rhythm-waltz", name: "Waltz Rhythm", notation: "DUM-da-da DUM-da-da",
@@ -390,7 +493,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ˈbjuːtɪfəl ˈmɔːrnɪŋ təˈdeɪ/", commonInChinese: false,
     chineseNote: "Triple meter is rare in Chinese; requires practice to maintain the 'bounce'",
-    difficulty: 3, category: "clause"
+    difficulty: 3, category: "clause",
+    sceneEmoji: "🌤️☕", scene: "morning-chat", lifeCategory: "social",
+    context_zh: "早上跟同事闲聊时：",
+    translation_zh: "今天早上真好 / 大家围过来"
   },
   {
     id: "rhythm-march", name: "March Rhythm", notation: "DUM-da DUM-da DUM-da",
@@ -404,7 +510,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/lɛts ɡɛt ˈstɑːrtɪd ˈkwɪkli/", commonInChinese: false,
     chineseNote: "Alternating stress is the backbone of English rhythm",
-    difficulty: 1, category: "clause"
+    difficulty: 1, category: "clause",
+    sceneEmoji: "💪🚀", scene: "motivating", lifeCategory: "work",
+    context_zh: "催促团队快速行动：",
+    translation_zh: "快点开始 / 推动进度"
   },
   // ── Sentence-level prosodic patterns ─────────────────────────────────
   {
@@ -417,7 +526,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ðə ˈmiːtɪŋ ɪz ət θriː/", commonInChinese: false,
     chineseNote: "New information carries nuclear stress; Chinese speakers often stress the subject instead",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "📢📌", scene: "announcing", lifeCategory: "work",
+    context_zh: "宣布一个新信息：",
+    translation_zh: "会议在三点 / 截止日期是周五"
   },
   {
     id: "sentence-contrastive", name: "Contrastive Stress", notation: "DUM...DUM",
@@ -430,7 +542,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/aɪ sɛd sɛnd nɒt ʃɪp/", commonInChinese: true,
     chineseNote: "Similar to Chinese contrastive emphasis; Chinese speakers handle this naturally",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "⚡🔀", scene: "correcting", lifeCategory: "work",
+    context_zh: "纠正别人的理解时：",
+    translation_zh: "我说的是发送，不是上线"
   },
   {
     id: "sentence-listing", name: "List Rhythm", notation: "DUM↗ DUM↗ and DUM↘",
@@ -442,7 +557,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ɛɡz mɪlk ənd brɛd/", commonInChinese: true,
     chineseNote: "Rising on each item, falling on the last — similar to Chinese listing",
-    difficulty: 1, category: "clause"
+    difficulty: 1, category: "clause",
+    sceneEmoji: "🛒📝", scene: "shopping-list", lifeCategory: "shopping",
+    context_zh: "在超市列购物清单时：",
+    translation_zh: "鸡蛋、牛奶和面包"
   },
   {
     id: "sentence-tag", name: "Tag Question", notation: "STATEMENT, da-DUM?",
@@ -454,7 +572,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ðæt wɜːrks ˈdʌzənt ɪt/", commonInChinese: false,
     chineseNote: "Tag questions don't exist in Chinese; the rising/falling pattern needs explicit practice",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "🤷‍♂️❓", scene: "seeking-agreement", lifeCategory: "social",
+    context_zh: "希望别人同意自己的看法：",
+    translation_zh: "可以吧，是不是？"
   },
   // ── Additional patterns to reach 50+ ──────────────────────────────────
   {
@@ -463,7 +584,10 @@ const PATTERN_DATA = [
     examples: ["a-GREE to HELP", "be-LIEVE in GROWTH", "a-CHIEVE a GOAL", "re-QUEST a CALL", "pro-POSE a PLAN", "de-CIDE to MOVE"],
     ipa: "/əˈɡriː tə hɛlp/", commonInChinese: false,
     chineseNote: "The repeated weak-strong pattern creates a 'heartbeat' rhythm unfamiliar to Chinese ears",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "🤝🎯", scene: "agreeing-to-help", lifeCategory: "work",
+    context_zh: "同意帮忙或支持某个目标：",
+    translation_zh: "同意帮忙 / 相信成长"
   },
   {
     id: "double-trochee", name: "Double Trochee", notation: "DUM-da DUM-da",
@@ -471,7 +595,10 @@ const PATTERN_DATA = [
     examples: ["NEV-er MIN-ded", "AL-ways WORK-ing", "HAP-py LAND-ing", "BREAK-through MO-ment", "QUICK-ly MOV-ing", "CARE-ful PLAN-ning"],
     ipa: "/ˈnɛvər ˈmaɪndɪd/", commonInChinese: false,
     chineseNote: "Two consecutive stress-unstress pairs; keep unstressed syllables truly light",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "🔄💪", scene: "ongoing-work", lifeCategory: "work",
+    context_zh: "描述持续进行的工作：",
+    translation_zh: "一直在工作 / 快速推进"
   },
   {
     id: "cretic", name: "Cretic", notation: "DUM-da-DUM",
@@ -479,7 +606,10 @@ const PATTERN_DATA = [
     examples: ["TAKE a LOOK", "HAVE a SEAT", "MAKE a MOVE", "DROP a LINE", "CATCH a BREAK", "SET a GOAL"],
     ipa: "/teɪk ə lʊk/", commonInChinese: false,
     chineseNote: "The article 'a' must be reduced to /ə/; Chinese speakers often say full /eɪ/",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "🪑👀", scene: "offering-seat", lifeCategory: "social",
+    context_zh: "礼貌地请别人坐下或看看：",
+    translation_zh: "看一看 / 请坐 / 行动起来"
   },
   {
     id: "molossus", name: "Molossus", notation: "DUM-DUM-DUM",
@@ -487,7 +617,10 @@ const PATTERN_DATA = [
     examples: ["WHO OWNS THIS", "SHIP IT NOW", "GREAT BIG WIN", "STOP RIGHT THERE", "MOVE FAST NOW", "GOOD HARD WORK"],
     ipa: "/huː oʊnz ðɪs/", commonInChinese: true,
     chineseNote: "Three equally stressed words; Chinese speakers can handle this pattern well",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "⚡🔥", scene: "urgent-command", lifeCategory: "work",
+    context_zh: "紧急情况下果断下达指令：",
+    translation_zh: "谁负责这个 / 现在就发"
   },
   {
     id: "choriamb", name: "Choriamb", notation: "DUM-da-da-DUM",
@@ -498,7 +631,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/wɛr duː wi stænd/", commonInChinese: false,
     chineseNote: "The two middle weak syllables must rush by; Chinese speakers give them too much time",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "❓📊", scene: "meeting-questions", lifeCategory: "work",
+    context_zh: "会议中提出关键问题：",
+    translation_zh: "我们目前什么情况？/ 怎么能帮忙？"
   },
   {
     id: "ionic-minor", name: "Ionic Minor", notation: "da-da-DUM-DUM",
@@ -509,7 +645,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ɪn ðə ˈmiːn taɪm/", commonInChinese: false,
     chineseNote: "Two quick unstressed syllables before two strong beats — needs rhythmic awareness",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "⏳🔄", scene: "meanwhile", lifeCategory: "work",
+    context_zh: "话题转折时说：",
+    translation_zh: "与此同时 / 另一方面"
   },
   {
     id: "ionic-major", name: "Ionic Major", notation: "DUM-DUM-da-da",
@@ -521,7 +660,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ɡreɪt wɜːrk ˈɛvriwʌn/", commonInChinese: false,
     chineseNote: "Front-loaded stress with trailing weak syllables that must fade quickly",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "🎉📣", scene: "big-announcement", lifeCategory: "work",
+    context_zh: "宣布好消息时：",
+    translation_zh: "做得好大家 / 大新闻"
   },
   {
     id: "emphatic-do", name: "Emphatic DO", notation: "da-DUM-DUM",
@@ -532,7 +674,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/aɪ duː θɪŋk/", commonInChinese: false,
     chineseNote: "Emphatic auxiliary stress is foreign to Chinese; 'do' must be noticeably louder",
-    difficulty: 2, category: "phrase"
+    difficulty: 2, category: "phrase",
+    sceneEmoji: "💯🙌", scene: "emphasizing", lifeCategory: "social",
+    context_zh: "强调自己确实做了某事：",
+    translation_zh: "我确实觉得 / 我们确实试过了"
   },
   {
     id: "cleft-it", name: "It-Cleft Focus", notation: "da-da-DUM-da-da",
@@ -546,7 +691,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ɪt wɒz ˈsɛrə huː kɔːld/", commonInChinese: false,
     chineseNote: "Focus word receives nuclear accent; surrounding words are drastically reduced",
-    difficulty: 3, category: "clause"
+    difficulty: 3, category: "clause",
+    sceneEmoji: "👉🔦", scene: "pinpointing", lifeCategory: "work",
+    context_zh: "强调具体是谁或什么导致的：",
+    translation_zh: "是Sarah打的电话 / 是预算太紧"
   },
   {
     id: "echo-stress", name: "Echo/Parallel Stress", notation: "DUM-da, DUM-da",
@@ -558,7 +706,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/plæn ɪt ʃɪp ɪt/", commonInChinese: true,
     chineseNote: "Parallel structures are common in Chinese; this pattern transfers well",
-    difficulty: 1, category: "clause"
+    difficulty: 1, category: "clause",
+    sceneEmoji: "📋✅", scene: "task-delegation", lifeCategory: "work",
+    context_zh: "快速分配任务时：",
+    translation_zh: "计划好，执行好 / 写好，分享好"
   },
   {
     id: "galloping", name: "Galloping", notation: "da-DUM-da da-DUM-da",
@@ -572,7 +723,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/əˈɡriːmənt nɪˈɡoʊʃiˌeɪtɪd/", commonInChinese: false,
     chineseNote: "Galloping rhythm requires confident reduction of the weak syllables",
-    difficulty: 3, category: "clause"
+    difficulty: 3, category: "clause",
+    sceneEmoji: "🏃📅", scene: "deadline-rush", lifeCategory: "work",
+    context_zh: "截止日期临近，加快节奏：",
+    translation_zh: "协议谈好了 / 截止日快到了"
   },
   {
     id: "bookend", name: "Bookend Stress", notation: "DUM-da-da-da-DUM",
@@ -586,7 +740,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/stɑːrt wɪð ðə ɛnd ɪn maɪnd/", commonInChinese: false,
     chineseNote: "The middle section must be compressed; Chinese speakers give each word equal space",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "🧠🎯", scene: "giving-advice", lifeCategory: "work",
+    context_zh: "给同事提建议时：",
+    translation_zh: "以终为始 / 继续保持好工作"
   },
   {
     id: "rhythm-swing", name: "Swing Rhythm", notation: "DUM-da-DUM-da-DUM",
@@ -600,7 +757,10 @@ const PATTERN_DATA = [
     ],
     ipa: "/ʃɪp ɪt fæst ænd kliːn/", commonInChinese: false,
     chineseNote: "Alternating strong-weak creates a 'swing' feel; maintain the bouncy rhythm throughout",
-    difficulty: 2, category: "clause"
+    difficulty: 2, category: "clause",
+    sceneEmoji: "🚀✨", scene: "team-motto", lifeCategory: "work",
+    context_zh: "激励团队的口号：",
+    translation_zh: "快速干净地发布 / 保持团队在正轨"
   },
   {
     id: "triplet-stress", name: "Triplet Stress", notation: "DUM-DUM-DUM",
@@ -612,8 +772,23 @@ const PATTERN_DATA = [
     ],
     ipa: "/plæn bɪld ʃɪp/", commonInChinese: true,
     chineseNote: "Three consecutive stressed monosyllables; Chinese speakers handle this well due to similar character rhythm",
-    difficulty: 1, category: "phrase"
+    difficulty: 1, category: "phrase",
+    sceneEmoji: "📋🔢", scene: "three-steps", lifeCategory: "work",
+    context_zh: "总结三个要点或步骤：",
+    translation_zh: "停下、放下、翻滚 / 计划、构建、发布"
   },
+];
+
+/** Life category definitions for UI display. */
+export const LIFE_CATEGORIES = [
+  { id: "work",          label: "🏢 职场",     labelEn: "Workplace" },
+  { id: "social",        label: "👋 社交",     labelEn: "Social" },
+  { id: "home",          label: "🏠 日常",     labelEn: "Daily Life" },
+  { id: "shopping",      label: "🛍️ 购物",     labelEn: "Shopping" },
+  { id: "food",          label: "☕ 餐饮",     labelEn: "Food & Drink" },
+  { id: "transport",     label: "🚕 出行",     labelEn: "Transport" },
+  { id: "entertainment", label: "🎉 娱乐",     labelEn: "Entertainment" },
+  { id: "phone",         label: "📱 电话",     labelEn: "Phone" },
 ];
 
 
@@ -1626,32 +1801,32 @@ export class WeaknessProfiler {
 
     if (averages.stress < 0.6) {
       warnings.push(
-        "Stress: Chinese is syllable-timed; English is stress-timed. You may be giving every syllable equal weight. Practice exaggerating the stressed syllables and swallowing the unstressed ones."
+        "重音：中文是音节等时语言，英语是重音等时语言。你可能把每个音节都读得一样重。练习夸张地重读实词，同时把虚词轻轻带过。"
       );
     }
     if (averages.intonation < 0.6) {
       warnings.push(
-        "Intonation: Chinese tones are lexical (fixed per character); English intonation is grammatical (changes meaning of whole sentences). Practice the difference between 'You like it.' (statement↘) and 'You like it?' (question↗)."
+        "语调：中文的声调是固定的（每个字有自己的声调），英语的语调是整句变化的（升降调改变句子意思）。练习区分 'You like it.'（陈述句↘）和 'You like it?'（疑问句↗）。"
       );
     }
     if (averages.linking < 0.6) {
       warnings.push(
-        "Linking: Chinese syllables are self-contained; English words blur together. Practice consonant-vowel linking: 'pick_it_up' = /pɪ.kɪ.tʌp/ (3 syllables, not 3 words)."
+        "连读：中文的每个字是独立的，英语的词会连在一起。练习辅音-元音连读：'pick it up' = /pɪ.kɪ.tʌp/（3个音节，不是3个词）。"
       );
     }
     if (averages.vowels < 0.6) {
       warnings.push(
-        "Vowels: Chinese has fewer vowel distinctions. Watch: /ɪ/ vs /iː/ (bit vs beat), /æ/ vs /ɛ/ (bad vs bed), and the schwa /ə/ which appears in nearly every unstressed syllable."
+        "元音：中文的元音区分比英语少。注意：/ɪ/ 和 /iː/（bit 和 beat）、/æ/ 和 /ɛ/（bad 和 bed），以及几乎出现在每个轻读音节中的弱元音 /ə/。"
       );
     }
     if (averages.consonants < 0.6) {
       warnings.push(
-        "Consonants: Common Chinese speaker issues: /θ/ and /ð/ (th sounds), /v/ vs /w/, final consonant clusters (/sts/, /sks/), and the dark /l/ in final position (feel, call)."
+        "辅音：中国人常见问题：/θ/ 和 /ð/（咬舌音 th）、/v/ 和 /w/ 混淆、词尾辅音串（/sts/、/sks/），以及词尾的暗化 /l/（如 feel、call）。"
       );
     }
     if (averages.speed < 0.6) {
       warnings.push(
-        "Speed: You may be speaking too evenly. English is not about going faster — it is about compressing unstressed syllables and stretching stressed ones. The overall speed follows from this rhythm."
+        "节奏：你的语速可能太均匀了。英语不是说得更快，而是压缩轻读音节、拉长重读音节。整体速度来自于这种节奏感。"
       );
     }
 
@@ -1681,44 +1856,44 @@ export class WeaknessProfiler {
 }
 
 const WEAKNESS_DESCRIPTIONS = {
-  stress: "You tend to give equal weight to all syllables. Focus on making stressed syllables louder and longer, and reducing unstressed syllables.",
-  intonation: "Your pitch range may be too narrow. English uses wide pitch movement to convey meaning — practice exaggerating rises and falls.",
-  linking: "Words are sounding separate instead of flowing together. Practice consonant-vowel linking and common reductions.",
-  speed: "Your pacing may be too even. Stressed syllables should take more time; unstressed syllables should rush by.",
-  vowels: "Some vowel sounds need attention. Focus on the schwa /ə/, and the distinction between similar vowels like /ɪ/ vs /iː/.",
-  consonants: "Some consonant sounds need practice. Focus on /θ/, /ð/, final consonant clusters, and the /v/ vs /w/ distinction.",
+  stress: "你倾向于把每个音节读得一样重。重读音节要读得更响、更长，轻读音节要弱化、缩短。",
+  intonation: "你的语调变化范围可能太窄了。英语靠声调的高低起伏来表达意思——练习夸张地升调和降调。",
+  linking: "词和词之间听起来太分离了。练习辅音-元音连读和常见的弱化形式。",
+  speed: "你的节奏可能太均匀了。重读音节要占更多时间，轻读音节要快速带过。",
+  vowels: "一些元音需要注意。重点练习弱读音 /ə/，以及相似元音的区分，如 /ɪ/ 和 /iː/。",
+  consonants: "一些辅音需要练习。重点关注 /θ/、/ð/（咬舌音）、词尾辅音串，以及 /v/ 和 /w/ 的区别。",
 };
 
 const CATEGORY_EXERCISES = {
   stress: [
-    "Let's kick things off (stress: KICK, OFF)",
-    "I want to flag something (stress: FLAG, SOMETHING)",
-    "That's a fascinating question (stress: FASCINATING, QUESTION)",
+    "Let's kick things off（重读：KICK、OFF）",
+    "I want to flag something（重读：FLAG、SOMETHING）",
+    "That's a fascinating question（重读：FASCINATING、QUESTION）",
   ],
   intonation: [
-    "Do you want some? (rising question ↗)",
-    "I need eggs, milk, and bread (list intonation ↗↗↘)",
-    "It's nice, isn't it? (tag question ↗↘)",
+    "Do you want some?（升调疑问句 ↗）",
+    "I need eggs, milk, and bread（列举语调 ↗↗↘）",
+    "It's nice, isn't it?（反意疑问句 ↗↘）",
   ],
   linking: [
-    "pick it up → pi-ki-tup (consonant→vowel)",
-    "don't you → dontchu (assimilation)",
-    "turn it off → tur-ni-toff (linking)",
+    "pick it up → pi-ki-tup（辅音→元音连读）",
+    "don't you → dontchu（同化连读）",
+    "turn it off → tur-ni-toff（连读）",
   ],
   speed: [
-    "I want to make sure we're all on the same page (compress: I-want-to, we're-all-on-the)",
-    "Just to set the agenda real quick (compress: Just-to, the-agenda)",
-    "Thanks everyone I'll give you five minutes back (compress: I'll-give-you)",
+    "I want to make sure we're all on the same page（压缩：I-want-to、we're-all-on-the）",
+    "Just to set the agenda real quick（压缩：Just-to、the-agenda）",
+    "Thanks everyone I'll give you five minutes back（压缩：I'll-give-you）",
   ],
   vowels: [
-    "Practice: bit /ɪ/ vs beat /iː/",
-    "Practice: bad /æ/ vs bed /ɛ/ vs bud /ʌ/",
-    "Practice: the unstressed 'a' in 'agenda' is /ə/, not /æ/",
+    "练习：bit /ɪ/ 和 beat /iː/ 的区别",
+    "练习：bad /æ/ 和 bed /ɛ/ 和 bud /ʌ/ 的区别",
+    "练习：agenda 中轻读的 'a' 是 /ə/，不是 /æ/",
   ],
   consonants: [
-    "Practice: think /θ/ — tongue between teeth",
-    "Practice: the /ð/ — voiced tongue between teeth",
-    "Practice: feel /fiːl/ — dark L at the end",
+    "练习：think /θ/ — 舌头伸到牙齿之间",
+    "练习：the /ð/ — 浊咬舌音",
+    "练习：feel /fiːl/ — 词尾的暗化 L",
   ],
 };
 

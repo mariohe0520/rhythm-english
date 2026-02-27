@@ -87,7 +87,7 @@ export class PitchDetector {
    */
   async start(stream) {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    this._ctx = new AudioCtx();
+    this._ctx = new AudioCtx({ latencyHint: 'interactive' });
     this.sampleRate = this._ctx.sampleRate;
 
     this._analyser = this._ctx.createAnalyser();
@@ -535,31 +535,38 @@ export class RhythmAnalyzer {
   }
 
   /**
-   * Generate human-readable feedback strings.
+   * Generate Chinese feedback strings for Chinese speakers learning English.
    * @private
    */
   _generateFeedback(stressAcc, timingR, inton, connected, wpm, pattern, words, stress) {
     const fb = [];
 
-    if (stressAcc >= 85) fb.push('Great stress placement -- you hit the strong beats!');
-    else if (stressAcc >= 60) fb.push('Stress is close, but some key words need more emphasis.');
+    if (stressAcc >= 85) fb.push('很棒！重音位置非常准确，节奏感很强！');
+    else if (stressAcc >= 60) {
+      const heavyWords = words.filter((_, i) => stress[i] >= 0.8);
+      fb.push(`重音快到位了！这几个词要读得更重更长：「${heavyWords.map(w => w.toUpperCase()).join('」「')}」`);
+    }
     else {
       const heavyWords = words.filter((_, i) => stress[i] >= 0.8);
-      fb.push(`Try punching harder on: ${heavyWords.map(w => w.toUpperCase()).join(', ')}`);
+      fb.push(`重音不够！「${heavyWords.map(w => w.toUpperCase()).join('」「')}」要用力读，像拍桌子一样有力！`);
     }
 
-    if (timingR < 50) fb.push('Unstressed syllables should be shorter and lighter -- let them slide.');
-    if (pattern === 'flat') fb.push('Your pitch sounds flat. Try exaggerating the melody more.');
+    if (timingR < 50) fb.push('轻重不分明——不重读的词要读得更轻更快，像一笔带过。');
+    if (pattern === 'flat') fb.push('语调太平了！英语像唱歌一样有高低起伏，试着夸张一点。');
     if (pattern === 'rising' && !words.join(' ').endsWith('?')) {
-      fb.push('Your pitch rises at the end -- for statements, let it fall.');
+      fb.push('这是陈述句，结尾语调要降下来，不要升上去。');
     }
 
     if (wpm > 0) {
-      if (wpm > 200) fb.push('You are speaking quite fast. Slow down to nail the rhythm first.');
-      else if (wpm < 80) fb.push('A bit slow -- once you feel the rhythm, try speeding up naturally.');
+      if (wpm > 200) fb.push('语速太快了！先慢下来，把节奏踩准了再加速。');
+      else if (wpm < 80) fb.push('稍微有点慢——感受到节奏后，试着自然地加快速度。');
     }
 
-    if (connected < 50) fb.push('Too many pauses between words. Try linking them together smoothly.');
+    if (connected < 50) fb.push('词和词之间停顿太多！试着连起来读，像一口气说完。');
+
+    if (stressAcc >= 85 && timingR >= 70 && connected >= 70) {
+      fb.push('节奏感不错，继续加油！');
+    }
 
     return fb;
   }
@@ -785,7 +792,7 @@ export class ProsodyComparator {
           type: 'too_flat',
           startTime: sectionStart,
           endTime: sectionEnd,
-          description: 'Pitch is too flat here -- try more variation'
+          description: '这里语调太平了——试着让声音有更多高低变化'
         });
       }
 
@@ -797,8 +804,8 @@ export class ProsodyComparator {
             startTime: sectionStart,
             endTime: sectionEnd,
             description: refDelta > 0
-              ? 'Pitch should rise here, but yours falls'
-              : 'Pitch should fall here, but yours rises'
+              ? '这里语调应该升上去，但你降下来了'
+              : '这里语调应该降下来，但你升上去了'
           });
         }
       }
@@ -810,14 +817,14 @@ export class ProsodyComparator {
         type: 'too_slow',
         startTime: 0,
         endTime: 1,
-        description: `You spoke ${Math.round((tempoRatio - 1) * 100)}% slower than native pace`
+        description: `你的语速比标准慢了 ${Math.round((tempoRatio - 1) * 100)}%，试着加快一点`
       });
     } else if (tempoRatio < 0.7) {
       problems.push({
         type: 'too_fast',
         startTime: 0,
         endTime: 1,
-        description: `You spoke ${Math.round((1 - tempoRatio) * 100)}% faster than native pace`
+        description: `你的语速比标准快了 ${Math.round((1 - tempoRatio) * 100)}%，放慢一点`
       });
     }
 
@@ -972,13 +979,11 @@ export class AdaptiveCoach {
   getPersonalizedFeedback(lang = 'en') {
     const profiles = this.getWeaknessProfile(lang);
     if (profiles.length === 0) {
-      return lang === 'cn'
-        ? 'Keep going -- you\'re making great progress!'
-        : 'Keep going -- you\'re making great progress!';
+      return '继续加油！你的进步很明显！';
     }
 
     const top = profiles.slice(0, 3);
-    const lines = top.map(p => lang === 'cn' ? p.feedbackCn : p.feedbackEn);
+    const lines = top.map(p => p.feedbackCn);
     return lines.join(' ');
   }
 
@@ -999,7 +1004,7 @@ export class AdaptiveCoach {
       const entry = this._data.history[key];
 
       let priority = 50; // Base priority for never-attempted sentences
-      let reason = 'New sentence -- try it out!';
+      let reason = '新句子——试试看！';
 
       if (entry) {
         // Spaced repetition: is it due?
@@ -1010,14 +1015,14 @@ export class AdaptiveCoach {
           // Due items get higher priority, especially if struggling
           priority = 70 + (100 - entry.emaScore) * 0.3;
           reason = entry.emaScore < 50
-            ? 'Needs more work -- keep practicing!'
-            : 'Time to review this one';
+            ? '还需要练习——继续加油！'
+            : '该复习了';
         } else if (entry.emaScore >= 85) {
           priority = 10; // Mastered, low priority
-          reason = 'Mastered';
+          reason = '已掌握';
         } else {
           priority = 30 + (100 - entry.emaScore) * 0.2;
-          reason = 'Building confidence';
+          reason = '继续巩固中';
         }
 
         // Bonus for weakness alignment with global weaknesses
@@ -1030,7 +1035,7 @@ export class AdaptiveCoach {
             globalWeak.some(gw => gw.includes(w) || w.includes(gw))
           );
           priority += overlap.length * 8;
-          if (overlap.length > 0) reason = 'Targets your weak area: ' + overlap.join(', ');
+          if (overlap.length > 0) reason = '针对你的薄弱环节：' + overlap.join('、');
         }
       }
 
@@ -1135,41 +1140,42 @@ export class AdaptiveCoach {
 }
 
 /**
- * Bilingual feedback templates for common weakness patterns.
+ * Chinese feedback templates for common weakness patterns.
+ * All feedback in Chinese for Chinese speakers learning English.
  * @private
  */
 const WEAKNESS_FEEDBACK = {
   stress: {
-    en: 'You often miss stress placement. Focus on making content words (nouns, verbs, adjectives) louder and longer.',
-    cn: 'You often miss stress placement. Focus on making content words louder and longer. (Zhongyindian changchang bu zhunque. Shide, zhuyao mingci, dongci, xingrongci geng da sheng, geng chang.)'
+    en: '重音经常不准确。实词（名词、动词、形容词）要读得更响更长，虚词要轻轻带过。',
+    cn: '重音经常不准确。实词（名词、动词、形容词）要读得更响更长，虚词要轻轻带过。'
   },
   timing: {
-    en: 'Your stressed and unstressed syllables sound too similar in length. Let unstressed syllables shrink.',
-    cn: 'Your stressed and unstressed syllables are too similar. Let unstressed ones shrink. (Zhongdu he feichongdu yinjie changdu tai xiangtong. Rang feichongdu yinjie suoduan.)'
+    en: '重读和轻读的音节长短差别不够。轻读的音节要缩短、弱化，像一笔带过。',
+    cn: '重读和轻读的音节长短差别不够。轻读的音节要缩短、弱化，像一笔带过。'
   },
   flat_pitch: {
-    en: 'Your pitch tends to stay flat. Try exaggerating the ups and downs -- think of it like singing.',
-    cn: 'Your pitch is too flat. Exaggerate the ups and downs -- think of it like singing. (Yudiao tai pingtan. Kuazhang shengdiao de qifu -- ba ta xiang xiang cheng changge.)'
+    en: '语调太平了！英语的语调像唱歌一样有高有低，试着夸张一些高低起伏。',
+    cn: '语调太平了！英语的语调像唱歌一样有高有低，试着夸张一些高低起伏。'
   },
   intonation: {
-    en: 'Your intonation pattern does not match. Questions should rise; statements should fall at the end.',
-    cn: 'Intonation does not match. Questions rise, statements fall at the end. (Yudiao moshi bu dui. Yiwen shangsheng, chenshu xiaxiang.)'
+    en: '语调模式不对。疑问句结尾要升调，陈述句结尾要降调。',
+    cn: '语调模式不对。疑问句结尾要升调，陈述句结尾要降调。'
   },
   connected: {
-    en: 'You are pausing too much between words. Try to link words together more smoothly.',
-    cn: 'Too many pauses between words. Link them together smoothly. (Ci zhi jian tingdun tai duo. Shizhe ba ci lianqi lai.)'
+    en: '词和词之间停顿太多。试着把词连起来读，像一口气说完一样。',
+    cn: '词和词之间停顿太多。试着把词连起来读，像一口气说完一样。'
   },
   too_fast: {
-    en: 'You tend to speak too fast. Slow down so the rhythm has room to breathe.',
-    cn: 'Speaking too fast. Slow down for better rhythm. (Shuo de tai kuai. Fang man sudu, rang jiezou you kongjian huxi.)'
+    en: '语速偏快。放慢速度，让节奏有呼吸的空间。',
+    cn: '语速偏快。放慢速度，让节奏有呼吸的空间。'
   },
   too_slow: {
-    en: 'You tend to speak too slowly. Try to let the words flow at a more natural pace.',
-    cn: 'Speaking too slowly. Let words flow at a natural pace. (Shuo de tai man. Rang ci geng ziran de liudong.)'
+    en: '语速偏慢。试着让词语更自然地流动起来。',
+    cn: '语速偏慢。试着让词语更自然地流动起来。'
   },
   rushed_unstressed: {
-    en: 'You rush through unstressed syllables too aggressively. They should be reduced, but not deleted.',
-    cn: 'Unstressed syllables are too rushed. Reduce them but do not delete. (Feichongdu yinjie tai cangcu. Jianshao dan bushi shanchu.)'
+    en: '轻读音节读得太草率了。要弱化但不要完全吞掉。',
+    cn: '轻读音节读得太草率了。要弱化但不要完全吞掉。'
   }
 };
 
@@ -1184,15 +1190,17 @@ const WEAKNESS_FEEDBACK = {
  * @property {Object[]} errors      - Detected potential errors for Chinese speakers
  * @property {string}   errors[].phoneme  - The problematic phoneme
  * @property {string}   errors[].type     - Error type identifier
- * @property {string}   errors[].tipEn    - English correction tip
- * @property {string}   errors[].tipCn    - Chinese correction tip
+ * @property {string}   errors[].tipCn    - Chinese correction tip with mouth guidance
+ * @property {string}   errors[].tipEn    - English fallback (same as tipCn)
  */
 
 /**
- * Rule-based English phoneme mapper with Chinese-speaker error detection.
- * Maps words to approximate phoneme sequences without requiring any API,
- * then identifies likely pronunciation errors based on common L1 transfer
- * patterns from Mandarin Chinese.
+ * 中文发音指导系统 — Chinese-Speaker Pronunciation Guide
+ *
+ * Rule-based English phoneme mapper with comprehensive Chinese-language
+ * error detection and mouth/tongue placement guidance.
+ * All tips are in Chinese with pinyin analogies instead of IPA.
+ * Covers the top 20 most common Chinese-speaker pronunciation errors.
  */
 export class PhonemeMapper {
   constructor() {
@@ -1202,7 +1210,6 @@ export class PhonemeMapper {
 
   /**
    * Map a word to its approximate phoneme sequence and detect potential errors.
-   *
    * @param {string} word
    * @returns {PhonemeAnalysis}
    */
@@ -1221,7 +1228,6 @@ export class PhonemeMapper {
 
   /**
    * Analyze an entire sentence and return per-word analysis.
-   *
    * @param {string[]} words
    * @returns {PhonemeAnalysis[]}
    */
@@ -1232,9 +1238,8 @@ export class PhonemeMapper {
   /**
    * Get a summary of all potential error patterns for a sentence,
    * deduplicated and sorted by severity for Chinese speakers.
-   *
    * @param {string[]} words
-   * @returns {Object[]} Array of {phoneme, type, tipEn, tipCn, count}
+   * @returns {Object[]} Array of {phoneme, type, tipCn, tipEn, count}
    */
   getSentenceErrors(words) {
     const allErrors = [];
@@ -1258,14 +1263,8 @@ export class PhonemeMapper {
 
   // -- Private: Rule-based phoneme mapping -----------------------------------
 
-  /**
-   * Convert a word to an approximate phoneme sequence using letter-to-sound rules.
-   * This is intentionally simplified -- it covers the most common English patterns
-   * sufficient for error detection purposes, not full TTS accuracy.
-   * @private
-   */
+  /** @private */
   _wordToPhonemes(word) {
-    // Check irregular/common words first
     const irregular = IRREGULAR_PHONEMES[word];
     if (irregular) return irregular.split(' ');
 
@@ -1276,10 +1275,16 @@ export class PhonemeMapper {
       const remaining = word.slice(i);
       let matched = false;
 
-      // Try multi-character patterns (longest match first)
       for (const [pattern, phoneme] of DIGRAPH_RULES) {
         if (remaining.startsWith(pattern)) {
-          if (phoneme) phonemes.push(phoneme);
+          if (phoneme) {
+            // Handle multi-phoneme digraphs (pipe-separated, e.g. 'SH|AH|N')
+            if (phoneme.includes('|')) {
+              phoneme.split('|').forEach(p => phonemes.push(p));
+            } else {
+              phonemes.push(phoneme);
+            }
+          }
           i += pattern.length;
           matched = true;
           break;
@@ -1288,13 +1293,9 @@ export class PhonemeMapper {
 
       if (matched) continue;
 
-      // Single character rules
       const ch = word[i];
-      const nextCh = word[i + 1] || '';
-      const prevCh = word[i - 1] || '';
 
       if (VOWELS.has(ch)) {
-        // Check for silent-e pattern (CVCe)
         const isSilentE = ch !== 'e' && i + 2 < word.length &&
           !VOWELS.has(word[i + 1]) && word[i + 2] === 'e' &&
           (i + 3 >= word.length || !VOWELS.has(word[i + 3]));
@@ -1305,7 +1306,6 @@ export class PhonemeMapper {
           phonemes.push(SHORT_VOWELS[ch] || ch);
         }
       } else {
-        // Consonant
         const phoneme = CONSONANT_MAP[ch];
         if (phoneme) phonemes.push(phoneme);
       }
@@ -1318,6 +1318,7 @@ export class PhonemeMapper {
 
   /**
    * Detect common Chinese-speaker pronunciation errors.
+   * All tips in Chinese with 3-step mouth guidance system.
    * @private
    */
   _detectErrors(word, phonemes) {
@@ -1327,67 +1328,122 @@ export class PhonemeMapper {
       const p = phonemes[i];
       const isWordFinal = i === phonemes.length - 1;
 
-      // th -> s/z confusion
-      if (p === 'TH' || p === 'DH') {
-        errors.push({
-          phoneme: p,
-          type: 'th_confusion',
-          tipEn: `"${p === 'TH' ? 'th' : 'th'}" in "${word}": Put your tongue between your teeth and blow air. Do NOT say "${p === 'TH' ? 's' : 'z'}".`,
-          tipCn: `"${word}" zhong de "th": she tou fang zai shangxia ya chi zhijian chui qi. Bu yao shuo cheng "${p === 'TH' ? 's' : 'z'}".`
-        });
+      // 1. th 咬舌音 — 中国人最常见的错误
+      if (p === 'TH') {
+        const tip = `「${word}」里的 th 是咬舌音！\n` +
+          `嘴型：嘴巴微微张开\n` +
+          `舌位：舌尖伸出来，轻轻咬在上下牙齿之间\n` +
+          `气流：用力从舌尖和牙齿的缝隙吹气出来\n` +
+          `不要读成「s」！跟拼音里的「si」完全不同`;
+        errors.push({ phoneme: p, type: 'th_voiceless', tipCn: tip, tipEn: tip });
+      }
+      if (p === 'DH') {
+        const tip = `「${word}」里的 th 是浊咬舌音！\n` +
+          `嘴型：嘴巴微微张开\n` +
+          `舌位：舌尖伸出来，轻轻咬在上下牙齿之间\n` +
+          `气流：让声带振动，同时从齿缝送气\n` +
+          `不要读成「z」或「d」！舌头一定要伸出来`;
+        errors.push({ phoneme: p, type: 'th_voiced', tipCn: tip, tipEn: tip });
       }
 
-      // r -> l confusion
-      if (p === 'R') {
-        errors.push({
-          phoneme: p,
-          type: 'r_l_confusion',
-          tipEn: `"r" in "${word}": Curl your tongue back. Do NOT touch the roof of your mouth. It is not "l".`,
-          tipCn: `"${word}" zhong de "r": she jian xiang hou juan. Bu yao peng dao kou qiang ding bu. Ta bu shi "l".`
-        });
-      }
-
-      // v -> w confusion
+      // 2. v 唇齿音 — 不是 w！
       if (p === 'V') {
-        errors.push({
-          phoneme: p,
-          type: 'v_w_confusion',
-          tipEn: `"v" in "${word}": Bite your lower lip gently and vibrate. Do NOT round your lips like "w".`,
-          tipCn: `"${word}" zhong de "v": qingqing yao xia chun, rang ta zhen dong. Bu yao ba zui chunn yuan qi xiang "w".`
-        });
+        const tip = `「${word}」里的 v 是唇齿音！\n` +
+          `嘴型：上牙轻轻咬住下嘴唇\n` +
+          `舌位：舌头放松，不用动\n` +
+          `气流：让声带振动，气从牙齿和下唇之间挤出来\n` +
+          `不要读成「w」！w 是双唇音（嘴巴圆起来），v 是牙齿碰嘴唇`;
+        errors.push({ phoneme: p, type: 'v_w_confusion', tipCn: tip, tipEn: tip });
       }
 
-      // Final consonant dropping
+      // 3. r 卷舌音 — 不是拼音的 r，也不是 l！
+      if (p === 'R') {
+        const tip = `「${word}」里的 r 要卷舌！\n` +
+          `嘴型：嘴唇稍微圆起来，像要说「乌」\n` +
+          `舌位：舌尖向上卷起但不要碰到上颚，舌头整体向后缩\n` +
+          `气流：气流从舌头两侧通过\n` +
+          `和拼音的「r（日）」不同！英语的 r 舌尖不碰任何地方，也不是「l」`;
+        errors.push({ phoneme: p, type: 'r_l_confusion', tipCn: tip, tipEn: tip });
+      }
+
+      // 4. l 舌侧音 — 尤其是词尾的 dark l
+      if (p === 'L' && isWordFinal) {
+        const tip = `「${word}」结尾的 l 不要吞掉！\n` +
+          `嘴型：嘴巴保持打开\n` +
+          `舌位：舌尖要抵住上牙齿后面的牙龈\n` +
+          `气流：气从舌头两侧出来\n` +
+          `很多中国人会把词尾的 l 吞掉或者读成「ou」，一定要让舌尖顶上去`;
+        errors.push({ phoneme: p, type: 'dark_l', tipCn: tip, tipEn: tip });
+      }
+
+      // 5. 尾音吞掉 — 中文没有闭音节
       if (isWordFinal && FINAL_CONSONANTS.has(p)) {
-        errors.push({
-          phoneme: p,
-          type: 'final_consonant_drop',
-          tipEn: `Do not drop the final "${p.toLowerCase()}" in "${word}". Release the sound clearly at the end.`,
-          tipCn: `Bu yao diu diao "${word}" jiewei de "${p.toLowerCase()}". Qingchu de shi fang zuihou de sheng yin.`
-        });
+        const consonantNames = {
+          'B': 'b', 'D': 'd', 'G': 'g', 'K': 'k', 'P': 'p', 'T': 't',
+          'V': 'v', 'Z': 'z', 'S': 's', 'F': 'f', 'N': 'n', 'M': 'm'
+        };
+        const cName = consonantNames[p] || p.toLowerCase();
+        const tip = `「${word}」的尾音「${cName}」不要吞掉！\n` +
+          `中文大部分字都是开音节（以元音结尾），所以我们容易把英语的尾辅音吞掉。\n` +
+          `练习方法：先夸张地把尾音发清楚，再慢慢减弱到自然。\n` +
+          `比如 "kick" 结尾的 k，嘴巴要做出 k 的动作，有轻微的气流爆破`;
+        errors.push({ phoneme: p, type: 'final_consonant_drop', tipCn: tip, tipEn: tip });
       }
 
-      // Short vs long vowel (bit vs beat)
+      // 6. 长短元音 — 中文没有这个区别
       if (VOWEL_LENGTH_PAIRS[p]) {
         const pair = VOWEL_LENGTH_PAIRS[p];
         errors.push({
           phoneme: p,
           type: 'vowel_length',
-          tipEn: `Watch the vowel length in "${word}": "${pair.short}" (short, relaxed) vs "${pair.long}" (long, tense). Chinese speakers often make them the same.`,
-          tipCn: `Zhuyi "${word}" zhong de yuan yin changdu: "${pair.short}" (duan, fangsong) he "${pair.long}" (chang, jinzhang). Zhongguo xuesheng changchang ba ta men shuo de yiyang.`
+          tipCn: pair.tipCn,
+          tipEn: pair.tipCn
         });
       }
 
-      // -ng final (adding extra 'g' sound)
+      // 7. ng 鼻音 — 不要加多余的 g
       if (p === 'NG') {
-        errors.push({
-          phoneme: p,
-          type: 'ng_final',
-          tipEn: `The "ng" in "${word}" is one nasal sound. Do NOT add an extra "g" at the end.`,
-          tipCn: `"${word}" zhong de "ng" shi yi ge bi yin. Bu yao zai zuihou jia shang "g" de sheng yin.`
-        });
+        const tip = `「${word}」里的 ng 是一个鼻音，不要在后面加「g」！\n` +
+          `嘴型：嘴巴微微张开\n` +
+          `舌位：舌根（舌头后部）抬起来碰到软腭\n` +
+          `气流：气从鼻子出来，不是从嘴巴\n` +
+          `像拼音里的「ng」（昂的韵尾），但不要在后面加一个硬的「g」音`;
+        errors.push({ phoneme: p, type: 'ng_extra_g', tipCn: tip, tipEn: tip });
+      }
+
+      // 8. w 双唇音 — 不是拼音的 w
+      if (p === 'W') {
+        const tip = `「${word}」里的 w 要嘴唇圆起来！\n` +
+          `嘴型：嘴唇收圆向前突出，像说拼音「u（乌）」\n` +
+          `舌位：舌头后部稍微抬高\n` +
+          `气流：声带振动，嘴唇从圆变扁\n` +
+          `比拼音的「w」嘴唇要圆得多，力度更大`;
+        errors.push({ phoneme: p, type: 'w_round', tipCn: tip, tipEn: tip });
+      }
+
+      // 9. 元音 ae (cat/bat) — 中文没有这个音
+      if (p === 'AE') {
+        const tip = `「${word}」里有一个中文没有的元音！\n` +
+          `嘴型：嘴巴张大，嘴角向两边拉（像微笑时张大嘴）\n` +
+          `舌位：舌头平放在嘴巴底部，舌尖碰下牙齿\n` +
+          `像拼音「ai（爱）」开头的「a」但嘴巴张得更大、更扁\n` +
+          `不要读成「e（额）」或「a（啊）」`;
+        errors.push({ phoneme: p, type: 'ae_vowel', tipCn: tip, tipEn: tip });
+      }
+
+      // 10. sh vs s — 中国人容易混淆
+      if (p === 'SH') {
+        const tip = `「${word}」里的 sh：\n` +
+          `嘴型：嘴唇稍微向前突出\n` +
+          `舌位：舌尖翘起来，靠近上颚但不碰到\n` +
+          `气流：气从舌尖和上颚之间挤出来\n` +
+          `和拼音「sh（诗）」类似，但英语的 sh 嘴唇更圆`;
+        errors.push({ phoneme: p, type: 'sh_sound', tipCn: tip, tipEn: tip });
       }
     }
+
+    // 11. 连读提示 — 句子层面
+    // (handled at sentence level in getSentenceErrors)
 
     return errors;
   }
@@ -1570,11 +1626,26 @@ const FINAL_CONSONANTS = new Set([
   'B', 'D', 'G', 'K', 'P', 'T', 'V', 'Z', 'TH', 'DH', 'S', 'F', 'L', 'N', 'M'
 ]);
 
-/** Vowel length pairs that Chinese speakers often confuse. @private */
+/** Vowel length pairs that Chinese speakers often confuse. All tips in Chinese. @private */
 const VOWEL_LENGTH_PAIRS = {
-  'IH': { short: '/ɪ/ (bit)', long: '/iː/ (beat)' },
-  'UH': { short: '/ʊ/ (book)', long: '/uː/ (boot)' },
-  'AE': { short: '/ae/ (bat)', long: '/ɑː/ (bath)' }
+  'IH': {
+    tipCn: `短元音（如 bit/sit）和长元音（如 beat/seat）要区分！\n` +
+      `短音：嘴巴放松微微张开，像拼音「yi（一）」但更短更轻\n` +
+      `长音：嘴角向两边拉，像微笑，舌头更紧张，拖长一点\n` +
+      `中国人经常把两个读成一样的，要注意长短区别！`
+  },
+  'UH': {
+    tipCn: `短元音（如 book/look）和长元音（如 boot/food）要区分！\n` +
+      `短音：嘴唇轻轻收圆，像拼音「u（乌）」但更短更放松\n` +
+      `长音：嘴唇用力收紧变圆，像吹口哨，拖长一点\n` +
+      `中国人经常把两个读成一样的，记住短的放松、长的紧张！`
+  },
+  'AE': {
+    tipCn: `注意！这个元音（如 cat/bat）中文里没有！\n` +
+      `嘴巴要张大，嘴角向两边拉（像夸张地笑着说「啊」）\n` +
+      `不要读成普通的「a（啊）」或「e（额）」\n` +
+      `和 bath/father 里的长「啊」也不一样，这个更短更扁`
+  }
 };
 
 // ---------------------------------------------------------------------------
@@ -1684,7 +1755,7 @@ export function createEngine(options = {}) {
    */
   async function analyzeRecording(userBlob, nativeBlob, sentenceData) {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioCtx();
+    const ctx = new AudioCtx({ latencyHint: 'interactive' });
 
     try {
       // Decode user audio
@@ -1722,8 +1793,8 @@ export function createEngine(options = {}) {
         sentenceData.stress
       );
 
-      // Generate combined feedback
-      const coachFeedback = adaptiveCoach.getPersonalizedFeedback('en');
+      // Generate combined feedback (always Chinese)
+      const coachFeedback = adaptiveCoach.getPersonalizedFeedback('cn');
 
       return {
         rhythm,
