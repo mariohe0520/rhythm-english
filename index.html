@@ -744,6 +744,7 @@ let audio=null;
 /* ---- Recording State ---- */
 let mediaRecorder=null,isRecording=false,recChunks=[],recBlob=null,recUrl=null;
 let recSentenceId=null,recScore=null,recTimerId=null,recStartTime=0;
+let recUserDur=null,recNativeDur=null,_userAudioBuf=null,_nativeAudioBuf=null;
 let audioCtx=null;
 function getAudioCtx(){
   if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive',sampleRate:44100});
@@ -1187,7 +1188,7 @@ async function startRecording(){
     const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,latency:0}});
     recChunks=[];
     recSentenceId=getSentences()[idx].id;
-    recScore=null;
+    recScore=null;recUserDur=null;recNativeDur=null;_userAudioBuf=null;_nativeAudioBuf=null;
 
     const mimeType=getRecMimeType();
     const useMediaRecorder=typeof MediaRecorder!=='undefined'&&mimeType!=='';
@@ -1326,9 +1327,17 @@ async function analyzeAndScore(){
   _analyzing=true;
   try{
     const actx=getAudioCtx();
-    const userBuf=await recBlob.arrayBuffer();
-    const userAudio=await actx.decodeAudioData(userBuf.slice(0));
-    drawWaveform(userAudio,'waveUser');
+    let userAudio=null;
+    try{
+      const userBuf=await recBlob.arrayBuffer();
+      userAudio=await actx.decodeAudioData(userBuf.slice(0));
+      _userAudioBuf=userAudio;recUserDur=userAudio.duration;
+      drawWaveform(userAudio,'waveUser');
+    }catch(de){
+      console.warn('decodeAudioData failed, continuing with AI analysis:',de);
+      // Estimate duration from blob size (webm/opus ~16kbps)
+      if(!recUserDur)recUserDur=Math.max(1,recBlob.size/2000);
+    }
     const s=getSentences()[idx];
     const id=String(s.id).padStart(2,'0');
 
@@ -1349,6 +1358,7 @@ async function analyzeAndScore(){
         if(nativeBlob){
           const natBuf=await nativeBlob.arrayBuffer();
           const natAudio=await actx.decodeAudioData(natBuf.slice(0));
+          _nativeAudioBuf=natAudio;recNativeDur=natAudio.duration;
           drawWaveform(natAudio,'waveNative');
         }
 
@@ -1357,15 +1367,15 @@ async function analyzeAndScore(){
         updateLearningStep(4);
         saveRecording(s.id,recScore);
 
-        // Update weakness profiler
+        // Update weakness profiler (scores must be 0-1 range, not 0-100)
         weaknessProfiler.recordAttempt({
           scores: {
-            stress: result.rhythm.stressAccuracy || 0,
-            intonation: result.rhythm.intonation || 0,
-            linking: result.rhythm.connectedSpeech || 0,
-            speed: result.rhythm.timingRatio || 0,
-            vowels: 70,
-            consonants: 70
+            stress: (result.rhythm.stressAccuracy || 0) / 100,
+            intonation: (result.rhythm.intonation || 0) / 100,
+            linking: (result.rhythm.connectedSpeech || 0) / 100,
+            speed: (result.rhythm.timingRatio || 0) / 100,
+            vowels: 0.7,
+            consonants: 0.7
           }
         });
 
@@ -1389,13 +1399,14 @@ async function analyzeAndScore(){
         const natAudio=await actx.decodeAudioData(natBuf.slice(0));
         nativeDur=natAudio.duration;
         nativePauses=detectPauses(natAudio);
+        _nativeAudioBuf=natAudio;recNativeDur=nativeDur;
         drawWaveform(natAudio,'waveNative');
       }
     }catch{}
-    const userDur=userAudio.duration;
+    const userDur=userAudio?userAudio.duration:(recUserDur||3);recUserDur=userDur;
     const durRatio=userDur/Math.max(nativeDur,0.5);
     const durScore=Math.max(0,60*(1-Math.abs(durRatio-1)*2));
-    const userPauses=detectPauses(userAudio);
+    const userPauses=userAudio?detectPauses(userAudio):0;
     const pauseDiff=Math.abs(userPauses-nativePauses);
     const pauseScore=Math.max(0,40-pauseDiff*12);
     const totalScore=Math.round(Math.min(100,Math.max(0,durScore+pauseScore)));
@@ -1507,8 +1518,15 @@ function renderRecCompare(){
   }
   html+='</div>';
   el.innerHTML=html;
+  // Re-draw cached waveforms (canvas elements were just rebuilt by innerHTML)
+  if(hasRec&&_userAudioBuf){
+    setTimeout(()=>{
+      drawWaveform(_userAudioBuf,'waveUser');
+      if(_nativeAudioBuf)drawWaveform(_nativeAudioBuf,'waveNative');
+    },30);
+  }
   if(hasRec&&recScore!==null){
-    renderScoreRing(recScore,0,0,0,0);
+    renderScoreRing(recScore,0,0,recUserDur||0,recNativeDur||0);
   }
 }
 
@@ -1524,7 +1542,7 @@ window.playUser=function(){
   const btn=document.getElementById('cmpUser');
   if(btn)btn.classList.add('cplaying');
   cmpAudio.onended=()=>{if(btn)btn.classList.remove('cplaying');cmpAudio=null;};
-  cmpAudio.play();
+  cmpAudio.play().catch(e=>{console.warn('playUser failed:',e);if(btn)btn.classList.remove('cplaying');cmpAudio=null;});
 };
 window.playHistRec=function(i){
   const s=getSentences()[idx];
