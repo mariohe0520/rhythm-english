@@ -535,6 +535,8 @@ body>*{position:relative;z-index:1}
 .cat-tab{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(20,25,41,.5);color:var(--dim);border:1px solid rgba(255,255,255,.06);transition:all .2s;scroll-snap-align:start;white-space:nowrap}
 .cat-tab:active{transform:scale(.95)}
 .cat-tab.active{background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(240,180,41,.12));color:var(--acc);border-color:rgba(240,180,41,.3);box-shadow:0 0 10px rgba(240,180,41,.1)}
+.cat-tab.life-cat-tab{border-color:rgba(52,211,153,.25)}
+.cat-tab.life-cat-tab.active{background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(16,185,129,.12));color:var(--ok);border-color:rgba(52,211,153,.4)}
 
 /* Step section labels in Chinese */
 .step-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--acc);text-transform:none;letter-spacing:0;margin-bottom:10px}

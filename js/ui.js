@@ -7,18 +7,21 @@ import { drawWaveform, renderScoreRing } from './speech/pronunciation.js';
 const $ = s => document.querySelector(s);
 
 /* ---- Category Tabs ---- */
-// 使用当天句子的实际 cat 值，不再使用与数据不匹配的 LIFE_CATEGORIES
-export function renderCategoryTabs(getSentences) {
+// 当天课程 subcategory tab + 生活场景 tab
+export function renderCategoryTabs(getSentences, LIFE_CATS) {
   const el = $('#categoryTabs');
   if (!el) return;
-  const sents = getSentences();
-  const cats = [...new Set(sents.map(s => s.cat).filter(Boolean))];
-  if (cats.length <= 1) { el.innerHTML = ''; return; } // 只有一种分类时不显示 tab
+
   let html = `<button class="cat-tab${state.activeCategoryFilter === null ? ' active' : ''}" onclick="window.filterCategory(null)">全部</button>`;
-  for (const c of cats) {
-    const safe = c.replace(/'/g, "\\'");
-    html += `<button class="cat-tab${state.activeCategoryFilter === c ? ' active' : ''}" onclick="window.filterCategory('${safe}')">${c}</button>`;
+
+  // 生活场景 tabs（永远显示）
+  if (LIFE_CATS && LIFE_CATS.length) {
+    for (const c of LIFE_CATS) {
+      const safe = c.replace(/'/g, "\\'");
+      html += `<button class="cat-tab life-cat-tab${state.activeCategoryFilter === c ? ' active' : ''}" onclick="window.filterCategory('${safe}')">${c}</button>`;
+    }
   }
+
   el.innerHTML = html;
 }
 
@@ -118,7 +121,7 @@ export function renderDaySwitcher(ALL_DAYS, dayMeta, getGeneratedDay) {
 
 /* ---- Main Render ---- */
 export function render(deps) {
-  const { getSentences, getScenes, aiEngine, LIFE_CATEGORIES, SR, Quiz, DailyChallenge, ALL_DAYS, dayMeta, getGeneratedDay, ShadowMode, stopRecording: stopRec } = deps;
+  const { getSentences, getScenes, aiEngine, LIFE_CATEGORIES, LIFE_CATS, SR, Quiz, DailyChallenge, ALL_DAYS, dayMeta, getGeneratedDay, ShadowMode, stopRecording: stopRec } = deps;
 
   if (state.isRecording) stopRec();
   // Clean up rhythm animation
@@ -182,8 +185,8 @@ export function render(deps) {
   const diffLevel = wordCount <= 3 ? '\u7B80\u5355' : wordCount <= 6 ? (stressedCount >= 3 ? '\u4E2D\u7B49' : '\u7B80\u5355') : '\u8F83\u96BE';
   const diffColor = diffLevel === '\u7B80\u5355' ? 'var(--ok)' : diffLevel === '\u4E2D\u7B49' ? 'var(--acc)' : 'var(--red)';
 
-  // Render category tabs（使用当天真实 cat 值）
-  renderCategoryTabs(getSentences);
+  // Render category tabs（课程 + 生活场景）
+  renderCategoryTabs(getSentences, LIFE_CATS);
 
   // 场景图：用大字排版替代 emoji
   const sceneTitle = sc.title || s.cat || '';

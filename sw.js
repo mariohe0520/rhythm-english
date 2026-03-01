@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v22'; // v22: 分类 tab 真实过滤，场景卡大字排版
+const CACHE = 'rhythm-v23'; // v23: 生活场景句子库（社交/日常/购物/餐饮/出行/娱乐）
 const ASSETS = [
   './',
   './index.html',
@@ -31,6 +31,7 @@ const ASSETS = [
   './data/day13.js',
   './data/day14.js',
   './data/generator.js',
+  './data/life-categories.js',
   './data/lessons.json',
   './modules/ai-engine.js',
   './modules/content-engine.js',

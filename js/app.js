@@ -17,6 +17,7 @@ import { DAY12, SCENES_DAY12 } from '../data/day12.js';
 import { DAY13, SCENES_DAY13 } from '../data/day13.js';
 import { DAY14, SCENES_DAY14 } from '../data/day14.js';
 import { generateDay } from '../data/generator.js';
+import { LIFE_SENTENCES, LIFE_CATS } from '../data/life-categories.js';
 
 // Engine imports
 import { createEngine } from '../modules/ai-engine.js';
@@ -52,6 +53,10 @@ function getAllSentencesForDay() {
   return getGeneratedDay(state.currentDay).sentences;
 }
 function getSentences() {
+  // 如果过滤的是生活场景分类，从 LIFE_SENTENCES 里取
+  if (state.activeCategoryFilter && LIFE_CATS.includes(state.activeCategoryFilter)) {
+    return LIFE_SENTENCES.filter(s => s.cat === state.activeCategoryFilter);
+  }
   const all = getAllSentencesForDay();
   if (!state.activeCategoryFilter) return all;
   const filtered = all.filter(s => s.cat === state.activeCategoryFilter);
@@ -107,6 +112,7 @@ const renderDeps = {
   getScenes,
   aiEngine,
   LIFE_CATEGORIES,
+  LIFE_CATS,
   SR: null, // will be set below
   Quiz: null,
   DailyChallenge: null,
