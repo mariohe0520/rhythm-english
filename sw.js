@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v25'; // v25: 生活场景照片本地化（不依赖外部CDN）
+const CACHE = 'rhythm-v26'; // v26: 全课程真实场景照片（14天商务+6类生活）
 const ASSETS = [
   './',
   './index.html',
@@ -41,7 +41,22 @@ const ASSETS = [
   './images/scenes/shopping.jpg',
   './images/scenes/dining.jpg',
   './images/scenes/travel.jpg',
-  './images/scenes/entertainment.jpg'
+  './images/scenes/entertainment.jpg',
+  './data/day-photos.js',
+  './images/days/meeting.jpg',
+  './images/days/negotiation.jpg',
+  './images/days/leadership.jpg',
+  './images/days/tech.jpg',
+  './images/days/conflict.jpg',
+  './images/days/networking.jpg',
+  './images/days/crisis.jpg',
+  './images/days/interview.jpg',
+  './images/days/presentation.jpg',
+  './images/days/crosscultural.jpg',
+  './images/days/remote.jpg',
+  './images/days/sales.jpg',
+  './images/days/publicspeaking.jpg',
+  './images/days/ai-future.jpg'
 ];
 // Pre-cache audio files for Day 1 (01-30)
 for (let i = 1; i <= 30; i++) ASSETS.push(`./audio/${String(i).padStart(2,'0')}.mp3`);

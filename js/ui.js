@@ -4,6 +4,7 @@ import { getProgress, isDayUnlocked, renderStreak, updateStreakIfNeeded, savePro
 import { getRecHistory } from './save.js';
 import { drawWaveform, renderScoreRing } from './speech/pronunciation.js';
 import { LIFE_CAT_PHOTOS } from '../data/life-categories.js';
+import { DAY_PHOTOS } from '../data/day-photos.js';
 
 const $ = s => document.querySelector(s);
 
@@ -194,11 +195,12 @@ export function render(deps) {
   // 场景图：生活场景用真实照片，商务课程用大字排版
   const sceneTitle = sc.title || s.cat || '';
   const sceneSub = sc.sub || '';
-  const catPhoto = LIFE_CAT_PHOTOS && LIFE_CAT_PHOTOS[s.cat];
-  const cardStyle = catPhoto
-    ? `background-image:url('${catPhoto}')`
+  // 优先用课程日主题照片，其次生活场景照片，最后渐变色兜底
+  const scenePhoto = (DAY_PHOTOS && DAY_PHOTOS[state.currentDay]) || (LIFE_CAT_PHOTOS && LIFE_CAT_PHOTOS[s.cat]);
+  const cardStyle = scenePhoto
+    ? `background-image:url('${scenePhoto}')`
     : `background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})`;
-  const cardClass = catPhoto ? 'scene-card-immersive has-photo' : 'scene-card-immersive';
+  const cardClass = scenePhoto ? 'scene-card-immersive has-photo' : 'scene-card-immersive';
 
   $('#card').innerHTML = `
     <!-- Learning step indicators -->
@@ -218,11 +220,11 @@ export function render(deps) {
 
     <!-- Scene Card — 生活场景用真实照片，商务课程用排版 -->
     <div class="${cardClass}" style="${cardStyle}">
-      ${catPhoto ? '<div class="scene-photo-overlay"></div>' : ''}
+      ${scenePhoto ? '<div class="scene-photo-overlay"></div>' : ''}
       <div class="scene-badge">${s.cat}</div>
-      ${!catPhoto ? `<div class="scene-visual-word" aria-hidden="true">${sceneTitle}</div>` : ''}
+      ${!scenePhoto ? `<div class="scene-visual-word" aria-hidden="true">${sceneTitle}</div>` : ''}
       <div class="scene-content">
-        ${!catPhoto ? `<div class="scene-sub-text">${sceneSub}</div>` : ''}
+        ${!scenePhoto ? `<div class="scene-sub-text">${sceneSub}</div>` : ''}
         <div class="scene-phrase-en">${s.text}</div>
         <div class="scene-translation-zh">${s.cn}</div>
       </div>
