@@ -1,7 +1,21 @@
-const CACHE = 'rhythm-v19';
+const CACHE = 'rhythm-v21'; // v21: 工程化重构，模块拆分
 const ASSETS = [
   './',
   './index.html',
+  './css/style.css',
+  './css/practice.css',
+  './js/config.js',
+  './js/state.js',
+  './js/save.js',
+  './js/progress.js',
+  './js/speech/tts.js',
+  './js/speech/stt.js',
+  './js/speech/pronunciation.js',
+  './js/practice/follow-read.js',
+  './js/practice/free-practice.js',
+  './js/ai-coach.js',
+  './js/ui.js',
+  './js/app.js',
   './data/sentences.js',
   './data/day2.js',
   './data/day3.js',
@@ -17,6 +31,7 @@ const ASSETS = [
   './data/day13.js',
   './data/day14.js',
   './data/generator.js',
+  './data/lessons.json',
   './modules/ai-engine.js',
   './modules/content-engine.js',
   './manifest.json'
