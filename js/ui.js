@@ -7,14 +7,17 @@ import { drawWaveform, renderScoreRing } from './speech/pronunciation.js';
 const $ = s => document.querySelector(s);
 
 /* ---- Category Tabs ---- */
-export function renderCategoryTabs(LIFE_CATEGORIES) {
+// 使用当天句子的实际 cat 值，不再使用与数据不匹配的 LIFE_CATEGORIES
+export function renderCategoryTabs(getSentences) {
   const el = $('#categoryTabs');
   if (!el) return;
-  const cats = LIFE_CATEGORIES || [];
-  if (!cats.length) { el.innerHTML = ''; return; }
-  let html = '<button class="cat-tab' + (state.activeCategoryFilter === null ? ' active' : '') + '" onclick="window.filterCategory(null)">\u5168\u90E8</button>';
+  const sents = getSentences();
+  const cats = [...new Set(sents.map(s => s.cat).filter(Boolean))];
+  if (cats.length <= 1) { el.innerHTML = ''; return; } // 只有一种分类时不显示 tab
+  let html = `<button class="cat-tab${state.activeCategoryFilter === null ? ' active' : ''}" onclick="window.filterCategory(null)">全部</button>`;
   for (const c of cats) {
-    html += `<button class="cat-tab${state.activeCategoryFilter === c.id ? ' active' : ''}" onclick="window.filterCategory('${c.id}')">${c.label}</button>`;
+    const safe = c.replace(/'/g, "\\'");
+    html += `<button class="cat-tab${state.activeCategoryFilter === c ? ' active' : ''}" onclick="window.filterCategory('${safe}')">${c}</button>`;
   }
   el.innerHTML = html;
 }
@@ -179,35 +182,38 @@ export function render(deps) {
   const diffLevel = wordCount <= 3 ? '\u7B80\u5355' : wordCount <= 6 ? (stressedCount >= 3 ? '\u4E2D\u7B49' : '\u7B80\u5355') : '\u8F83\u96BE';
   const diffColor = diffLevel === '\u7B80\u5355' ? 'var(--ok)' : diffLevel === '\u4E2D\u7B49' ? 'var(--acc)' : 'var(--red)';
 
-  // Scene emoji
-  const sceneEmojis = (s.scene && s.scene.length <= 10) ? s.scene : sc.icon;
+  // Render category tabs（使用当天真实 cat 值）
+  renderCategoryTabs(getSentences);
 
-  // Render category tabs
-  renderCategoryTabs(LIFE_CATEGORIES);
+  // 场景图：用大字排版替代 emoji
+  const sceneTitle = sc.title || s.cat || '';
+  const sceneSub = sc.sub || '';
 
   $('#card').innerHTML = `
     <!-- Learning step indicators -->
     <div class="learning-steps">
-      <div class="learning-step active" id="lstep1"><span class="learning-step-num">1</span> \u770B\u573A\u666F</div>
-      <span class="learning-step-arrow">\u2192</span>
-      <div class="learning-step" id="lstep2"><span class="learning-step-num">2</span> \u542C\u53D1\u97F3</div>
-      <span class="learning-step-arrow">\u2192</span>
-      <div class="learning-step" id="lstep3"><span class="learning-step-num">3</span> \u8DDF\u6211\u8BFB</div>
-      <span class="learning-step-arrow">\u2192</span>
-      <div class="learning-step" id="lstep4"><span class="learning-step-num">4</span> \u770B\u7ED3\u679C</div>
+      <div class="learning-step active" id="lstep1"><span class="learning-step-num">1</span> 看场景</div>
+      <span class="learning-step-arrow">→</span>
+      <div class="learning-step" id="lstep2"><span class="learning-step-num">2</span> 听发音</div>
+      <span class="learning-step-arrow">→</span>
+      <div class="learning-step" id="lstep3"><span class="learning-step-num">3</span> 跟我读</div>
+      <span class="learning-step-arrow">→</span>
+      <div class="learning-step" id="lstep4"><span class="learning-step-num">4</span> 看结果</div>
     </div>
 
-    <div class="cat">${s.cat} \u00B7 ${state.idx + 1}/${sents.length}
-      <span style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.06);color:${diffColor};font-weight:700">\u96BE\u5EA6\uFF1A${diffLevel}</span>
+    <div class="cat">${s.cat} · ${state.idx + 1}/${sents.length}
+      <span style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.06);color:${diffColor};font-weight:700">难度：${diffLevel}</span>
     </div>
 
-    <!-- Scene -->
+    <!-- Scene Card — 大字排版取代 emoji -->
     <div class="scene-card-immersive" style="background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})">
-      <div class="scene-badge">${sc.title || s.cat}</div>
-      <div class="scene-emojis">${sceneEmojis}</div>
-      <div class="scene-context-zh">${sc.sub || ''}</div>
-      <div class="scene-phrase-en">${s.text}</div>
-      <div class="scene-translation-zh">${s.cn}</div>
+      <div class="scene-badge">${s.cat}</div>
+      <div class="scene-visual-word" aria-hidden="true">${sceneTitle}</div>
+      <div class="scene-content">
+        <div class="scene-sub-text">${sceneSub}</div>
+        <div class="scene-phrase-en">${s.text}</div>
+        <div class="scene-translation-zh">${s.cn}</div>
+      </div>
     </div>
 
     <!-- Listen -->

@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v21'; // v21: 工程化重构，模块拆分
+const CACHE = 'rhythm-v22'; // v22: 分类 tab 真实过滤，场景卡大字排版
 const ASSETS = [
   './',
   './index.html',

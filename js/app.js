@@ -47,7 +47,16 @@ const ALL_SCENES = [SCENES, SCENES_DAY2, SCENES_DAY3, SCENES_DAY4, SCENES_DAY5, 
 
 const generatedCache = {};
 function getGeneratedDay(day) { if (!generatedCache[day]) generatedCache[day] = generateDay(day); return generatedCache[day]; }
-function getSentences() { if (state.currentDay <= 14) return ALL_DAYS[state.currentDay - 1] || DAY1; return getGeneratedDay(state.currentDay).sentences; }
+function getAllSentencesForDay() {
+  if (state.currentDay <= 14) return ALL_DAYS[state.currentDay - 1] || DAY1;
+  return getGeneratedDay(state.currentDay).sentences;
+}
+function getSentences() {
+  const all = getAllSentencesForDay();
+  if (!state.activeCategoryFilter) return all;
+  const filtered = all.filter(s => s.cat === state.activeCategoryFilter);
+  return filtered.length ? filtered : all; // 无匹配时显示全部
+}
 function getScenes() { if (state.currentDay <= 14) return ALL_SCENES[state.currentDay - 1] || SCENES; return getGeneratedDay(state.currentDay).scenes; }
 
 /* Day metadata for UI switcher */
@@ -597,7 +606,8 @@ window.toggleCN = function() {
 /* ---- Category Filter ---- */
 window.filterCategory = function(cat) {
   state.activeCategoryFilter = cat;
-  renderCategoryTabs(LIFE_CATEGORIES);
+  state.idx = 0; // 切换分类时跳回第一句
+  doRender();
 };
 
 /* ---- Audio playback ---- */
