@@ -63,11 +63,8 @@ const CATS = {
   dating:         {n:"Relationships",    c:["#f43f5e","#fda4af"], diff:1},
   shopping:       {n:"Shopping",         c:["#d946ef","#e879f9"], diff:1},
 };
-// Merge IELTS template pools into existing banks
+// Merge IELTS categories into CATS now (needed for CAT_KEYS)
 Object.assign(CATS, IELTS_CATS);
-Object.assign(SCENE_TITLES, IELTS_SCENE_TITLES);
-Object.assign(TPL, IELTS_TPL);
-Object.assign(CAT_ICONS, IELTS_CAT_ICONS);
 const CAT_KEYS = Object.keys(CATS);
 
 // ─── Scene Title Generator ────────────────────────────────────────
@@ -404,7 +401,12 @@ function fillSlots(str, rng) {
     .replace(/\{G\}/g, () => pick(GENRES, rng));
 }
 
-// ─── Generate Day Content (Day 15+) ──────────────────────────────
+// Merge IELTS scene titles, templates, icons (after all consts are defined)
+Object.assign(SCENE_TITLES, IELTS_SCENE_TITLES);
+Object.assign(TPL, IELTS_TPL);
+Object.assign(CAT_ICONS, IELTS_CAT_ICONS);
+
+// ─── Generate Day Content (Day 23+) ──────────────────────────────
 // Returns { sentences: [...], scenes: {...} } matching static day format
 export function generateDay(dayNumber) {
   const seed = hashStr('rhythm-english-day-' + dayNumber);
