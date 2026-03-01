@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v24'; // v24: 生活场景真实照片（Unsplash）+ 标签缩略图
+const CACHE = 'rhythm-v25'; // v25: 生活场景照片本地化（不依赖外部CDN）
 const ASSETS = [
   './',
   './index.html',
@@ -35,7 +35,13 @@ const ASSETS = [
   './data/lessons.json',
   './modules/ai-engine.js',
   './modules/content-engine.js',
-  './manifest.json'
+  './manifest.json',
+  './images/scenes/social.jpg',
+  './images/scenes/daily.jpg',
+  './images/scenes/shopping.jpg',
+  './images/scenes/dining.jpg',
+  './images/scenes/travel.jpg',
+  './images/scenes/entertainment.jpg'
 ];
 // Pre-cache audio files for Day 1 (01-30)
 for (let i = 1; i <= 30; i++) ASSETS.push(`./audio/${String(i).padStart(2,'0')}.mp3`);

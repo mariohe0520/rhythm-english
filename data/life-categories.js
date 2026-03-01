@@ -747,12 +747,12 @@ export const LIFE_SENTENCES = [
 
 export const LIFE_CATS = ["社交","日常","购物","餐饮","出行","娱乐"];
 
-// Curated lifestyle photos (Unsplash CDN, stable IDs)
+// Curated lifestyle photos — locally hosted in images/scenes/
 export const LIFE_CAT_PHOTOS = {
-  "社交": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=75",
-  "日常": "https://images.unsplash.com/photo-1484069560501-87d72b0e3d05?auto=format&fit=crop&w=800&q=75",
-  "购物": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=75",
-  "餐饮": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=75",
-  "出行": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=75",
-  "娱乐": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=75"
+  "社交": "./images/scenes/social.jpg",
+  "日常": "./images/scenes/daily.jpg",
+  "购物": "./images/scenes/shopping.jpg",
+  "餐饮": "./images/scenes/dining.jpg",
+  "出行": "./images/scenes/travel.jpg",
+  "娱乐": "./images/scenes/entertainment.jpg"
 };
