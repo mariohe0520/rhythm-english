@@ -16,6 +16,14 @@ import { DAY11, SCENES_DAY11 } from '../data/day11.js';
 import { DAY12, SCENES_DAY12 } from '../data/day12.js';
 import { DAY13, SCENES_DAY13 } from '../data/day13.js';
 import { DAY14, SCENES_DAY14 } from '../data/day14.js';
+import { DAY15, SCENES_DAY15 } from '../data/day15.js';
+import { DAY16, SCENES_DAY16 } from '../data/day16.js';
+import { DAY17, SCENES_DAY17 } from '../data/day17.js';
+import { DAY18, SCENES_DAY18 } from '../data/day18.js';
+import { DAY19, SCENES_DAY19 } from '../data/day19.js';
+import { DAY20, SCENES_DAY20 } from '../data/day20.js';
+import { DAY21, SCENES_DAY21 } from '../data/day21.js';
+import { DAY22, SCENES_DAY22 } from '../data/day22.js';
 import { generateDay } from '../data/generator.js';
 import { LIFE_SENTENCES, LIFE_CATS } from '../data/life-categories.js';
 
@@ -43,13 +51,13 @@ const intonationPatterns = new IntonationPatterns();
 const weaknessProfiler = new WeaknessProfiler();
 
 /* ---- Day Data ---- */
-const ALL_DAYS = [DAY1, DAY2, DAY3, DAY4, DAY5, DAY6, DAY7, DAY8, DAY9, DAY10, DAY11, DAY12, DAY13, DAY14];
-const ALL_SCENES = [SCENES, SCENES_DAY2, SCENES_DAY3, SCENES_DAY4, SCENES_DAY5, SCENES_DAY6, SCENES_DAY7, SCENES_DAY8, SCENES_DAY9, SCENES_DAY10, SCENES_DAY11, SCENES_DAY12, SCENES_DAY13, SCENES_DAY14];
+const ALL_DAYS = [DAY1, DAY2, DAY3, DAY4, DAY5, DAY6, DAY7, DAY8, DAY9, DAY10, DAY11, DAY12, DAY13, DAY14, DAY15, DAY16, DAY17, DAY18, DAY19, DAY20, DAY21, DAY22];
+const ALL_SCENES = [SCENES, SCENES_DAY2, SCENES_DAY3, SCENES_DAY4, SCENES_DAY5, SCENES_DAY6, SCENES_DAY7, SCENES_DAY8, SCENES_DAY9, SCENES_DAY10, SCENES_DAY11, SCENES_DAY12, SCENES_DAY13, SCENES_DAY14, SCENES_DAY15, SCENES_DAY16, SCENES_DAY17, SCENES_DAY18, SCENES_DAY19, SCENES_DAY20, SCENES_DAY21, SCENES_DAY22];
 
 const generatedCache = {};
 function getGeneratedDay(day) { if (!generatedCache[day]) generatedCache[day] = generateDay(day); return generatedCache[day]; }
 function getAllSentencesForDay() {
-  if (state.currentDay <= 14) return ALL_DAYS[state.currentDay - 1] || DAY1;
+  if (state.currentDay <= 22) return ALL_DAYS[state.currentDay - 1] || DAY1;
   return getGeneratedDay(state.currentDay).sentences;
 }
 function getSentences() {
@@ -62,7 +70,7 @@ function getSentences() {
   const filtered = all.filter(s => s.cat === state.activeCategoryFilter);
   return filtered.length ? filtered : all; // 无匹配时显示全部
 }
-function getScenes() { if (state.currentDay <= 14) return ALL_SCENES[state.currentDay - 1] || SCENES; return getGeneratedDay(state.currentDay).scenes; }
+function getScenes() { if (state.currentDay <= 22) return ALL_SCENES[state.currentDay - 1] || SCENES; return getGeneratedDay(state.currentDay).scenes; }
 
 /* Day metadata for UI switcher */
 const dayMeta = [
@@ -78,8 +86,16 @@ const dayMeta = [
   { n: 10, label: '\u7B2C10\u5929', sub: '\u8DE8\u6587\u5316', data: DAY10 },
   { n: 11, label: '\u7B2C11\u5929', sub: '\u8FDC\u7A0B\u5DE5\u4F5C', data: DAY11 },
   { n: 12, label: '\u7B2C12\u5929', sub: '\u9500\u552E', data: DAY12 },
-  { n: 13, label: '\u7B2C13\u5929', sub: '\u516C\u5F00\u6F14\u8BB2', data: DAY13 },
-  { n: 14, label: '\u7B2C14\u5929', sub: 'AI\u4E0E\u672A\u6765', data: DAY14 }
+  { n: 13, label: '第13天', sub: '公开演讲', data: DAY13 },
+  { n: 14, label: '第14天', sub: 'AI与未来', data: DAY14 },
+  { n: 15, label: '第15天', sub: 'IELTS·家乡', data: DAY15 },
+  { n: 16, label: '第16天', sub: 'IELTS·工作学习', data: DAY16 },
+  { n: 17, label: '第17天', sub: 'IELTS·爱好', data: DAY17 },
+  { n: 18, label: '第18天', sub: 'IELTS·家庭', data: DAY18 },
+  { n: 19, label: '第19天', sub: 'IELTS·科技', data: DAY19 },
+  { n: 20, label: '第20天', sub: 'IELTS·健康饮食', data: DAY20 },
+  { n: 21, label: '第21天', sub: 'IELTS·描述经历', data: DAY21 },
+  { n: 22, label: '第22天', sub: 'IELTS·社会议题', data: DAY22 }
 ];
 
 /* ---- Migrate old data ---- */

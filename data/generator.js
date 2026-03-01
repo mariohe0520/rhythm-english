@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════
 // Rhythm English — Procedural Content Engine v3
-// Generates infinite daily content from day 15+, daily challenges,
-// spaced repetition review, and learning stats.
+// Generates infinite daily content from day 23+, IELTS-weighted.
 // ═══════════════════════════════════════════════════════════════════
+import { IELTS_CATS, IELTS_SCENE_TITLES, IELTS_TPL, IELTS_CAT_ICONS } from './ielts-generator.js';
 
 // ─── Seeded PRNG (Mulberry32) ────────────────────────────────────
 function mulberry32(seed) {
@@ -63,6 +63,11 @@ const CATS = {
   dating:         {n:"Relationships",    c:["#f43f5e","#fda4af"], diff:1},
   shopping:       {n:"Shopping",         c:["#d946ef","#e879f9"], diff:1},
 };
+// Merge IELTS template pools into existing banks
+Object.assign(CATS, IELTS_CATS);
+Object.assign(SCENE_TITLES, IELTS_SCENE_TITLES);
+Object.assign(TPL, IELTS_TPL);
+Object.assign(CAT_ICONS, IELTS_CAT_ICONS);
 const CAT_KEYS = Object.keys(CATS);
 
 // ─── Scene Title Generator ────────────────────────────────────────
@@ -405,8 +410,15 @@ export function generateDay(dayNumber) {
   const seed = hashStr('rhythm-english-day-' + dayNumber);
   const rng = mulberry32(seed);
 
-  // Pick 6 categories, 5 sentences each = 30
-  const availCats = CAT_KEYS.filter(k => TPL[k] && TPL[k].length >= 5);
+  // IELTS weighting increases with day number (Day 23+)
+  // Days 23-60: 2x IELTS weight | Days 61-120: 3x | Days 121+: 4x
+  const ieltsKeys = Object.keys(IELTS_CATS || {}).filter(k => TPL[k] && TPL[k].length >= 5);
+  const bizKeys = CAT_KEYS.filter(k => !k.startsWith('ielts_') && TPL[k] && TPL[k].length >= 5);
+  const ieltsWeight = dayNumber <= 60 ? 2 : dayNumber <= 120 ? 3 : 4;
+  const pool = [...bizKeys];
+  for (let w = 0; w < ieltsWeight; w++) pool.push(...ieltsKeys);
+
+  const availCats = pool.filter(k => TPL[k] && TPL[k].length >= 5);
   const chosenCats = pickN(availCats, 6, rng);
 
   const sentences = [];
