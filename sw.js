@@ -1,4 +1,4 @@
-const CACHE = 'rhythm-v23'; // v23: 生活场景句子库（社交/日常/购物/餐饮/出行/娱乐）
+const CACHE = 'rhythm-v24'; // v24: 生活场景真实照片（Unsplash）+ 标签缩略图
 const ASSETS = [
   './',
   './index.html',
@@ -58,8 +58,8 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(r => {
       if (r) return r;
       return fetch(e.request).then(response => {
-        // Cache audio and data files on first fetch
-        if (response.ok && (e.request.url.includes('/audio/') || e.request.url.includes('/data/'))) {
+        // Cache audio, data files, and Unsplash lifestyle photos on first fetch
+        if (response.ok && (e.request.url.includes('/audio/') || e.request.url.includes('/data/') || e.request.url.includes('images.unsplash.com'))) {
           const clone = response.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }

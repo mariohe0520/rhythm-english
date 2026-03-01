@@ -3,6 +3,7 @@ import state from './state.js';
 import { getProgress, isDayUnlocked, renderStreak, updateStreakIfNeeded, saveProgress } from './progress.js';
 import { getRecHistory } from './save.js';
 import { drawWaveform, renderScoreRing } from './speech/pronunciation.js';
+import { LIFE_CAT_PHOTOS } from '../data/life-categories.js';
 
 const $ = s => document.querySelector(s);
 
@@ -18,7 +19,9 @@ export function renderCategoryTabs(getSentences, LIFE_CATS) {
   if (LIFE_CATS && LIFE_CATS.length) {
     for (const c of LIFE_CATS) {
       const safe = c.replace(/'/g, "\\'");
-      html += `<button class="cat-tab life-cat-tab${state.activeCategoryFilter === c ? ' active' : ''}" onclick="window.filterCategory('${safe}')">${c}</button>`;
+      const photo = LIFE_CAT_PHOTOS && LIFE_CAT_PHOTOS[c];
+      const thumb = photo ? `<span class="tab-thumb" style="background-image:url('${photo}')"></span>` : '';
+      html += `<button class="cat-tab life-cat-tab${state.activeCategoryFilter === c ? ' active' : ''}" onclick="window.filterCategory('${safe}')">${thumb}${c}</button>`;
     }
   }
 
@@ -188,9 +191,14 @@ export function render(deps) {
   // Render category tabs（课程 + 生活场景）
   renderCategoryTabs(getSentences, LIFE_CATS);
 
-  // 场景图：用大字排版替代 emoji
+  // 场景图：生活场景用真实照片，商务课程用大字排版
   const sceneTitle = sc.title || s.cat || '';
   const sceneSub = sc.sub || '';
+  const catPhoto = LIFE_CAT_PHOTOS && LIFE_CAT_PHOTOS[s.cat];
+  const cardStyle = catPhoto
+    ? `background-image:url('${catPhoto}')`
+    : `background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})`;
+  const cardClass = catPhoto ? 'scene-card-immersive has-photo' : 'scene-card-immersive';
 
   $('#card').innerHTML = `
     <!-- Learning step indicators -->
@@ -208,12 +216,13 @@ export function render(deps) {
       <span style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.06);color:${diffColor};font-weight:700">难度：${diffLevel}</span>
     </div>
 
-    <!-- Scene Card — 大字排版取代 emoji -->
-    <div class="scene-card-immersive" style="background:linear-gradient(135deg,${sc.colors[0]},${sc.colors[1]})">
+    <!-- Scene Card — 生活场景用真实照片，商务课程用排版 -->
+    <div class="${cardClass}" style="${cardStyle}">
+      ${catPhoto ? '<div class="scene-photo-overlay"></div>' : ''}
       <div class="scene-badge">${s.cat}</div>
-      <div class="scene-visual-word" aria-hidden="true">${sceneTitle}</div>
+      ${!catPhoto ? `<div class="scene-visual-word" aria-hidden="true">${sceneTitle}</div>` : ''}
       <div class="scene-content">
-        <div class="scene-sub-text">${sceneSub}</div>
+        ${!catPhoto ? `<div class="scene-sub-text">${sceneSub}</div>` : ''}
         <div class="scene-phrase-en">${s.text}</div>
         <div class="scene-translation-zh">${s.cn}</div>
       </div>
